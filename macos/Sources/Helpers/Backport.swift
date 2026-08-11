@@ -107,12 +107,12 @@ enum BackportPointerStyle {
         case .horizontalText: return .horizontalText
         case .verticalText: return .verticalText
         case .link: return .link
-        case .resizeLeft: return .frameResize(position: .trailing, directions: [.inward])
-        case .resizeRight: return .frameResize(position: .leading, directions: [.inward])
-        case .resizeUp: return .frameResize(position: .bottom, directions: [.inward])
-        case .resizeDown: return .frameResize(position: .top, directions: [.inward])
-        case .resizeUpDown: return .frameResize(position: .top)
-        case .resizeLeftRight: return .frameResize(position: .trailing)
+        case .resizeLeft: return .columnResize(directions: .leading)
+        case .resizeRight: return .columnResize(directions: .trailing)
+        case .resizeUp: return .rowResize(directions: .up)
+        case .resizeDown: return .rowResize(directions: .down)
+        case .resizeUpDown: return .rowResize
+        case .resizeLeftRight: return .columnResize
         }
     }
     #endif
@@ -132,8 +132,19 @@ enum BackportNSGlassStyle {
     #endif
 }
 
-/// Backported `TextField` that supports text selection on macOS 15/iOS 18 and up. The `selection`
-/// has no effect on versions below macOS 15/iOS 18.
+/// Backported `TextField` that supports text selection on macOS 26/iOS 18 and up. The `selection`
+/// has no effect on versions below macOS 26/iOS 18.
+///
+/// Although the API is available from macOS 15, we force it to be 26. Because on macOS 15,
+/// SwiftUI will crash when deleting texts, even for this simple example.
+///
+///     struct ContentView: View {
+///         @State private var text = ""
+///         @State private var selection: TextSelection?
+///         var body: some View {
+///             TextField("Search", text: $text, selection: $selection)
+///         }
+///     }
 struct BackportSelectionTextField: View {
     private let titleKey: LocalizedStringKey
     @Binding private var text: String
@@ -150,7 +161,7 @@ struct BackportSelectionTextField: View {
     }
 
     var body: some View {
-        if #available(iOS 18.0, macOS 15, *) {
+        if #available(iOS 18.0, macOS 26, *) {
             TextField(
                 titleKey,
                 text: _text,

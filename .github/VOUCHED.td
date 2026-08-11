@@ -23,8 +23,10 @@
 00jciv00
 04cb
 0xdvc
+12ya
 -4rh1t3ct0r7
 52dyd
+a-lang
 aalhendi
 aaron-ang
 abdurrahmanski
@@ -47,8 +49,12 @@ andrejdaskalov
 anhthang
 anmitalidev
 anthonyzhoon
+aprilnea
+arvin7liu
 athaapa
 atomk
+aurelleb
+aymanbagabas
 b0uks
 b1nar10
 balazs-szucs
@@ -62,9 +68,12 @@ bitigchi
 bkircher
 bleikurr
 bo2themax
+bousii
 brentschroeter
 brianc442
 c0x0o
+carldaws
+carlvillads
 cespare
 charliie-dev
 chernetskyi
@@ -81,6 +90,7 @@ damyanbogoev
 danneu
 danulqua
 dariogriffo
+dave92082
 davidsanchez222
 deblasis
 dervedro
@@ -103,20 +113,26 @@ ephemera
 -eric-assetpass Try talking, not botting
 eriksremess
 erral
+escalonc
+eunos-1128
 exlee
 -f1813483-netizen
+fallintoplace
 faukah
 filip7
 flou
 fornwall
 francescarpi
 fru1tworld
+gadgetman6
 gagbo
 ghokun
 gmile
 gordonbondon
+gotenksin
 gpanders
 guilhermetk
+-guysoft LLM communication (likely automated)
 h3nock
 hakonhagland
 halosatrio
@@ -132,7 +148,7 @@ illiakrauchanka
 j0hnm4r5
 jacobsandlund
 jake-stewart
-jamesarch
+-jamesarch Bad AI etiquette
 jamylak
 jarred-sumner
 jcollie
@@ -169,6 +185,7 @@ lepips
 liby
 linustalacko
 lonsagisawa
+lotheac
 louisunlimited
 luisnquin
 lynicis
@@ -202,6 +219,7 @@ mrconnorkenway
 mrmage
 mtak
 mustafa0x
+nagato-yuzuru
 natesmyth
 neo773
 neurosnap
@@ -221,6 +239,7 @@ paaloeye
 pan93412
 pangoraw
 pauley-unsaturated
+pearkes
 peilingjiang
 peterdavehello
 philocalyst
@@ -230,11 +249,13 @@ pluiedev
 pouwerkerk
 poweruser64
 prakhar54-byte
+prihlop
 priyans-hu
 puzza007
 qappell
 quinnypig
 qwerasd205
+ragnoroct
 raphamorim
 reo101
 rewdy
@@ -245,17 +266,24 @@ rjwittams
 rmengelbrecht
 rmunn
 rockorager
+ronijacobson
 rpfaeffle
+ruoyouz
+ruseel
 sahilkmishra
 samasaur1
 sandydoo
+sanjj1
 -schickling-assistant NHITL
 secrus
 seruman
 seyoungjeong
 silveirapf
+simonbcn
 slsrepo
 sunshine-syz
+svmhdvn
+tasselx
 tbrundige
 tdgroot
 tdslot
@@ -269,18 +297,23 @@ turbolent
 tweedbeetle
 uhojin
 unphased
+unsaltedscholar
 uzaaft
 vancluever
 vaughanandrews
+-vectorpeak Stupid bot cosplaying as a maintainer
+vegerot
 viruslobster
 vlsi
 voidnv
 williamhcarter
 wyounas
 yabbal
+yak3d
 yamshta
 ydah
 -zaviro
+zenangst
 zenyr
 zeshi09
 zubb

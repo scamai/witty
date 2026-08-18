@@ -2685,8 +2685,8 @@ pub fn keyEventIsBinding(
 /// but are not tmux. Outside tmux a gated binding resolves to the binding it
 /// replaced, so e.g. cmd+d still performs a native witty split.
 fn altScreenKeybindsActive(self: *Surface) bool {
-    self.renderer_state.mutex.lock();
-    defer self.renderer_state.mutex.unlock();
+    self.renderer_state.mutex.lockUncancelable(global.io());
+    defer self.renderer_state.mutex.unlock(global.io());
     return self.io.terminal.screens.active_key == .alternate and
         self.io.terminal.modes.get(.tmux_active);
 }

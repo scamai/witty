@@ -71,6 +71,19 @@ pub fn init(
             xc_config,
         });
 
+        // Pass the signing identity as an xcodebuild build setting rather
+        // than an env var: we deliberately hand xcodebuild an empty
+        // environment above, so an env var would never reach it.
+        //
+        // CODE_SIGN_STYLE must drop to Manual alongside it. The project
+        // defaults to Automatic, and automatic signing demands a
+        // DEVELOPMENT_TEAM the moment the identity is anything but ad-hoc,
+        // which a local (self-signed) certificate does not have.
+        if (config.macos_sign_identity) |identity| step.addArgs(&.{
+            b.fmt("WITTY_CODE_SIGN_IDENTITY={s}", .{identity}),
+            "CODE_SIGN_STYLE=Manual",
+        });
+
         // If we have a specific architecture, we need to pass it
         // to xcodebuild.
         if (xc_arch) |arch| step.addArgs(&.{ "-arch", arch });

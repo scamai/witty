@@ -62,6 +62,15 @@ emit_xcframework: bool = false,
 emit_webdata: bool = false,
 emit_unicode_table_gen: bool = false,
 
+/// The code signing identity used for the macOS app bundle. When null we
+/// fall back to ad-hoc signing ("-"), which is the upstream default.
+///
+/// Ad-hoc signatures have no stable anchor, so macOS TCC can only pin them
+/// by cdhash. Every rebuild produces a new cdhash and silently revokes any
+/// granted permission (Screen Recording, Accessibility, ...). Naming a
+/// stable signing identity here makes those grants survive rebuilds.
+macos_sign_identity: ?[]const u8 = null,
+
 /// True when Ghostty is being built as a dependency of another project
 /// rather than as the root project.
 is_dep: bool = false,
@@ -501,6 +510,17 @@ pub fn init(b: *std.Build, appVersion: []const u8, libVersion: []const u8) !Conf
         "emit-macos-app",
         "Build and install the macOS app bundle.",
     ) orelse !config.emit_lib_vt and config.emit_xcframework;
+
+    config.macos_sign_identity = ident: {
+        if (b.option(
+            []const u8,
+            "macos-sign-identity",
+            "Code signing identity for the macOS app bundle. Defaults to " ++
+                "$WITTY_CODE_SIGN_IDENTITY, then to ad-hoc signing.",
+        )) |v| break :ident if (v.len > 0) v else null;
+        const v = env.get("WITTY_CODE_SIGN_IDENTITY") orelse break :ident null;
+        break :ident if (v.len > 0) v else null;
+    };
 
     //---------------------------------------------------------------
     // System Packages

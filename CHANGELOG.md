@@ -6,6 +6,59 @@ documented here. Upstream Ghostty changes are not duplicated; see
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [witty-v0.1.3] — 2026-09-19
+
+Synced with upstream Ghostty at `b32f20f3e` (2026-09-19) — 793 commits since
+the previous fork point (`94d775fef`, 2026-08-10), including the Kitty
+clipboard protocol on macOS (OSC 52 writes, `?5522` paste events, permission
+prompts, `ghostty_terminal_paste`), a terminal search C API
+(`ghostty_search_*`), Kitty graphics fixes, a DECRPM report refactor (full
+u16 query range), a bash shell-integration upgrade (bash-preexec 0.7.0), and
+a `scrollback-pull-on-resize` option. See
+[ghostty-org/ghostty](https://github.com/ghostty-org/ghostty) for details.
+
+### Changed
+
+- **Witty now has its own bundle identifier: `dev.shenxingy.witty`** (plus
+  `-dock-tile` / `.debug` variants). This supersedes v0.1.2's note that the
+  bundle ID was intentionally left as `com.mitchellh.ghostty` — ad-hoc signing
+  meant every rebuild got a new cdhash and macOS silently revoked granted
+  permissions (Screen Recording, Accessibility, ...). A stable bundle ID plus
+  a named signing identity fix that. Set `WITTY_CODE_SIGN_IDENTITY` (build)
+  or `$(WITTY_CODE_SIGN_IDENTITY)` (Xcode) to your signing identity; it
+  defaults to ad-hoc signing (`-`) exactly as before. The config directory
+  (`~/.config/ghostty`) and the `ghostty` CLI are still unchanged.
+- Builds against Zig 0.16 (matching upstream's pinned toolchain).
+
+### Internal
+
+- **The `tmux_active` (`?8771`) bit moved from 42 to 43.** Upstream added
+  `kitty_paste_events` (`?5522`) to the mode registry ahead of it. The binary
+  snapshot's stable mode registry was widened accordingly (`u42` → `u43`) so
+  upstream modes round-trip while witty's transient `tmux_active` stays
+  excluded from snapshots (it must be re-announced by the live tmux client
+  after restore).
+- Witty branding (product name, bundle IDs, display names, signing, violet
+  icon) was re-applied onto upstream's restructured Xcode project — upstream
+  dropped the iOS app target and the file-system-synchronized exception list
+  in this window, so the project file was taken from upstream and the Witty
+  deltas replayed on top.
+
+### Fixed
+
+- **The macOS unit-test gate (`macos/build.nu --action test`, or the
+  `xcodebuild test` step inside `zig build test`) works again.** It had been
+  broken since the Witty.app rename: `TEST_HOST` in the Xcode project and the
+  shared scheme's `BuildableName` still pointed at `Ghostty.app`, and — once
+  the host resolved — the test target failed with "Unable to resolve module
+  dependency: 'Ghostty'" because renaming `PRODUCT_NAME` to `Witty` also
+  renamed the app target's Swift module out from under the tests'
+  `@testable import Ghostty`. The scheme/`TEST_HOST` now reference
+  `Witty.app` (the executable inside stays `ghostty`, per the target's
+  explicit `EXECUTABLE_NAME`), and the app target sets
+  `PRODUCT_MODULE_NAME = Ghostty` so its Swift module keeps its upstream name
+  while the product is Witty.app.
+
 ## [witty-v0.1.2] — 2026-06-29
 
 Synced with upstream Ghostty at `28f9367be` (2026-06-29) — 29 commits since the

@@ -12,6 +12,7 @@ const gtk = @import("gtk");
 
 const build_config = @import("../../../build_config.zig");
 const build_info = @import("../build/info.zig");
+const cli = @import("../../../cli.zig");
 const global = @import("../../../global.zig");
 const i18n = @import("../../../os/main.zig").i18n;
 const apprt = @import("../../../apprt.zig");
@@ -769,6 +770,7 @@ pub const Application = extern struct {
 
             .set_title => Action.setTitle(target, value),
             .set_tab_title => return Action.setTabTitle(target, value),
+            .set_window_title => return Action.setWindowTitle(target, value),
 
             .show_child_exited => return Action.showChildExited(target, value),
 
@@ -1854,6 +1856,7 @@ pub const Application = extern struct {
             null,
             if (overrides) |o| .{
                 .command = o.command,
+                .shell_integration = o.shell_integration,
                 .working_directory = o.working_directory,
                 .title = o.title,
             } else .none,
@@ -1934,6 +1937,7 @@ pub const Application = extern struct {
                 },
                 .{
                     .command = overrides.command,
+                    .shell_integration = overrides.shell_integration,
                     .working_directory = overrides.working_directory,
                     .title = overrides.title,
                 },
@@ -1946,6 +1950,7 @@ pub const Application = extern struct {
                 null,
                 .{
                     .command = overrides.command,
+                    .shell_integration = overrides.shell_integration,
                     .working_directory = overrides.working_directory,
                     .title = overrides.title,
                 },
@@ -1957,6 +1962,7 @@ pub const Application = extern struct {
 
     fn parseOverrides(arena_alloc: Allocator, arguments_it: *glib.VariantIter) (Allocator.Error || error{ValueRequired})!struct {
         command: ?configpkg.Command = null,
+        shell_integration: ?configpkg.Config.ShellIntegration = null,
         working_directory: ?[:0]const u8 = null,
         title: ?[:0]const u8 = null,
     } {
@@ -1965,6 +1971,9 @@ pub const Application = extern struct {
         var working_directory: ?[:0]const u8 = null;
         var title: ?[:0]const u8 = null;
         var command: ?configpkg.Command = null;
+        var parsed_shell_integration: struct {
+            @"shell-integration": ?configpkg.Config.ShellIntegration = null,
+        } = .{};
 
         const s_variant_type = glib.VariantType.new("s");
         defer s_variant_type.free();
@@ -2010,6 +2019,19 @@ pub const Application = extern struct {
                 command = cmd;
                 continue;
             }
+            if (std.mem.cutPrefix(u8, str, "--shell-integration=")) |v| {
+                cli.args.parseIntoField(
+                    @TypeOf(parsed_shell_integration),
+                    arena_alloc,
+                    &parsed_shell_integration,
+                    "shell-integration",
+                    std.mem.trim(u8, v, &std.ascii.whitespace),
+                ) catch |err| {
+                    log.warn("unable to parse shell integration {s}: {t}", .{ v, err });
+                    continue;
+                };
+                continue;
+            }
             if (std.mem.cutPrefix(u8, str, "--working-directory=")) |v| {
                 working_directory = arena_alloc.dupeZ(u8, std.mem.trim(u8, v, &std.ascii.whitespace)) catch |err| {
                     log.warn("unable to duplicate working directory: {t}", .{err});
@@ -2034,6 +2056,7 @@ pub const Application = extern struct {
 
         return .{
             .command = command,
+            .shell_integration = parsed_shell_integration.@"shell-integration",
             .working_directory = working_directory,
             .title = title,
         };
@@ -2635,6 +2658,7 @@ const Action = struct {
         target: apprt.Target,
         overrides: struct {
             command: ?configpkg.Command = null,
+            shell_integration: ?configpkg.Config.ShellIntegration = null,
             working_directory: ?[:0]const u8 = null,
             title: ?[:0]const u8 = null,
 
@@ -2661,6 +2685,7 @@ const Action = struct {
                 };
                 window.newTab(core, .{
                     .command = overrides.command,
+                    .shell_integration = overrides.shell_integration,
                     .working_directory = overrides.working_directory,
                     .title = overrides.title,
                 });
@@ -2674,6 +2699,7 @@ const Action = struct {
         parent: ?*CoreSurface,
         overrides: struct {
             command: ?configpkg.Command = null,
+            shell_integration: ?configpkg.Config.ShellIntegration = null,
             working_directory: ?[:0]const u8 = null,
             title: ?[:0]const u8 = null,
 
@@ -2696,6 +2722,7 @@ const Action = struct {
             parent,
             .{
                 .command = overrides.command,
+                .shell_integration = overrides.shell_integration,
                 .working_directory = overrides.working_directory,
                 .title = overrides.title,
             },
@@ -2708,6 +2735,7 @@ const Action = struct {
         parent: ?*CoreSurface,
         overrides: struct {
             command: ?configpkg.Command = null,
+            shell_integration: ?configpkg.Config.ShellIntegration = null,
             working_directory: ?[:0]const u8 = null,
             title: ?[:0]const u8 = null,
 
@@ -2728,6 +2756,7 @@ const Action = struct {
         // Create a new tab with window context (first tab in new window)
         win.newTabForWindow(parent, .{
             .command = overrides.command,
+            .shell_integration = overrides.shell_integration,
             .working_directory = overrides.working_directory,
             .title = overrides.title,
         });
@@ -2887,6 +2916,23 @@ const Action = struct {
                             return false;
                         };
                         tab.promptTabTitle();
+                        return true;
+                    },
+                }
+            },
+            .window => {
+                switch (target) {
+                    .app => return false,
+                    .surface => |v| {
+                        const surface = v.rt_surface.surface;
+                        const win = ext.getAncestor(
+                            Window,
+                            surface.as(gtk.Widget),
+                        ) orelse {
+                            log.warn("surface is not in a window, ignoring prompt_window_title", .{});
+                            return false;
+                        };
+                        win.promptWindowTitle();
                         return true;
                     },
                 }
@@ -3057,6 +3103,30 @@ const Action = struct {
                     return false;
                 };
                 tab.setTitleOverride(if (value.title.len == 0) null else value.title);
+                return true;
+            },
+        }
+    }
+
+    pub fn setWindowTitle(
+        target: apprt.Target,
+        value: apprt.action.SetTitle,
+    ) bool {
+        switch (target) {
+            .app => {
+                log.warn("set_tab_title to app is unexpected", .{});
+                return false;
+            },
+            .surface => |core| {
+                const surface = core.rt_surface.surface;
+                const window = ext.getAncestor(
+                    Window,
+                    surface.as(gtk.Widget),
+                ) orelse {
+                    log.warn("surface is not in a window, ignoring set_window_title", .{});
+                    return false;
+                };
+                window.setTitleOverride(if (value.title.len == 0) null else value.title);
                 return true;
             },
         }
@@ -3306,69 +3376,22 @@ const Action = struct {
 fn setGtkEnv(config: *const CoreConfig) std.Io.Writer.Error!void {
     assert(gtk.isInitialized() == 0);
 
-    var gdk_debug: struct {
-        /// output OpenGL debug information
+    const gdk_debug: struct {
+        /// Output OpenGL debug information,
+        /// `gtk-opengl-debug` dumps logs directly to stderr so both must be true
+        /// to enable OpenGL debugging.
         opengl: bool = false,
-        /// disable GLES, Ghostty can't use GLES
-        @"gl-disable-gles": bool = false,
-        // GTK's new renderer can cause blurry font when using fractional scaling.
-        @"gl-no-fractional": bool = false,
-        /// Disabling Vulkan can improve startup times by hundreds of
-        /// milliseconds on some systems. We don't use Vulkan so we can just
-        /// disable it.
-        @"vulkan-disable": bool = false,
     } = .{
-        // `gtk-opengl-debug` dumps logs directly to stderr so both must be true
-        // to enable OpenGL debugging.
         .opengl = global.logging().stderr and config.@"gtk-opengl-debug",
     };
 
-    var gdk_disable: struct {
-        @"gles-api": bool = false,
-        /// current gtk implementation for color management is not good enough.
-        /// see: https://bugs.kde.org/show_bug.cgi?id=495647
-        /// gtk issue: https://gitlab.gnome.org/GNOME/gtk/-/issues/6864
-        @"color-mgmt": bool = true,
-        /// Disabling Vulkan can improve startup times by hundreds of
-        /// milliseconds on some systems. We don't use Vulkan so we can just
-        /// disable it.
-        vulkan: bool = false,
+    const gdk_disable: struct {
+        // Even though we don't use GTK's GL context anymore, there can still
+        // occasionally be conflicts when Vulkan and OpenGL are used together.
+        // Disabling Vulkan also saves hundreds of milliseconds of initialization
+        // time on certain systems.
+        vulkan: bool = true,
     } = .{};
-
-    environment: {
-        if (gtk_version.runtimeAtLeast(4, 18, 0)) {
-            gdk_disable.@"color-mgmt" = false;
-        }
-
-        if (gtk_version.runtimeAtLeast(4, 16, 0)) {
-            // From gtk 4.16, GDK_DEBUG is split into GDK_DEBUG and GDK_DISABLE.
-            // For the remainder of "why" see the 4.14 comment below.
-            gdk_disable.@"gles-api" = true;
-            gdk_disable.vulkan = true;
-            break :environment;
-        }
-        if (gtk_version.runtimeAtLeast(4, 14, 0)) {
-            // We need to export GDK_DEBUG to run on Wayland after GTK 4.14.
-            // Older versions of GTK do not support these values so it is safe
-            // to always set this. Forwards versions are uncertain so we'll have
-            // to reassess...
-            //
-            // Upstream issue: https://gitlab.gnome.org/GNOME/gtk/-/issues/6589
-            gdk_debug.@"gl-disable-gles" = true;
-            gdk_debug.@"vulkan-disable" = true;
-
-            if (gtk_version.runtimeUntil(4, 17, 5)) {
-                // Removed at GTK v4.17.5
-                gdk_debug.@"gl-no-fractional" = true;
-            }
-            break :environment;
-        }
-
-        // Versions prior to 4.14 are a bit of an unknown for Ghostty. It
-        // is an environment that isn't tested well and we don't have a
-        // good understanding of what we may need to do.
-        gdk_debug.@"vulkan-disable" = true;
-    }
 
     {
         var buf: [1024]u8 = undefined;

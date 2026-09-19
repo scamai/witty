@@ -599,9 +599,6 @@ pub const Action = union(enum) {
     move_tab: isize,
 
     /// Move a tab to a new window.
-    ///
-    /// Only implemented on Linux, but there's a native tab menu provided by
-    /// macOS.
     move_tab_to_new_window,
 
     /// Toggle the tab overview.
@@ -619,6 +616,13 @@ pub const Action = union(enum) {
     /// and persists across focus changes within the tab.
     prompt_tab_title,
 
+    /// Change the title of the current window via a pop-up prompt. The
+    /// title set via this prompt overrides any title set by the terminal
+    /// and persists across focus changes within the tab.
+    ///
+    /// Only implemented on Linux.
+    prompt_window_title,
+
     /// Set the title for the current focused surface.
     ///
     /// If the title is empty, the surface title is reset to an empty title.
@@ -628,6 +632,13 @@ pub const Action = union(enum) {
     ///
     /// If the title is empty, the tab title override is cleared.
     set_tab_title: []const u8,
+
+    /// Set the title for the current focused window.
+    ///
+    /// If the title is empty, the tab title override is cleared.
+    ///
+    /// Only implement on Linux.
+    set_window_title: []const u8,
 
     /// Create a new split in the specified direction.
     ///
@@ -1399,8 +1410,10 @@ pub const Action = union(enum) {
             .set_font_size,
             .prompt_surface_title,
             .prompt_tab_title,
+            .prompt_window_title,
             .set_surface_title,
             .set_tab_title,
+            .set_window_title,
             .clear_screen,
             .select_all,
             .scroll_to_top,

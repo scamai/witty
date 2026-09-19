@@ -206,7 +206,8 @@
 //! bit 39  report_color_scheme
 //! bit 40  report_visibility
 //! bit 41  in_band_size_reports
-//! bits 42-63  reserved, zero
+//! bit 42  kitty_paste_events
+//! bits 43-63  reserved, zero
 //! ```
 //!
 //! This is the packed field order of native `ModePacked`. Its layout is
@@ -263,10 +264,11 @@ const ModeBits = @typeInfo(
     terminal_modes.ModePacked,
 ).@"struct".backing_integer.?;
 
-/// The v1 snapshot registry contains only upstream's stable modes. Witty's
-/// transient `tmux_active` signal is intentionally excluded: it must be
-/// announced again by the live tmux client after restore.
-const SnapshotModeBits = u42;
+/// The v1 snapshot registry contains only upstream's stable modes (currently
+/// 43 bits). Witty's transient `tmux_active` signal is intentionally
+/// excluded: it must be announced again by the live tmux client after
+/// restore.
+const SnapshotModeBits = u43;
 
 /// Reuse the terminal's semantic RGB value without adopting its memory layout
 /// as a wire encoding.
@@ -476,7 +478,7 @@ pub const Header = struct {
         try writer.writeByte(@intFromBool(self.password_input));
 
         // Runtime, saved, and reset mode sets. The stable v1 registry occupies
-        // 42 bits; its eight-byte wire slots zero-extend that packed value.
+        // 43 bits; its eight-byte wire slots zero-extend that packed value.
         const mode_values = [_]terminal_modes.ModePacked{
             self.current_modes,
             self.saved_modes,
@@ -767,7 +769,7 @@ pub const Header = struct {
 
 /// Allocator-owned semantic state decoded from one TERMINAL payload.
 ///
-/// The palette and fixed header are values. `tabstops`, `pwd`, and `title`
+/// The fixed header is a value. `tabstops`, `palette`, `pwd`, and `title`
 /// own allocations and are released by `deinit`.
 const DecodedPayload = struct {
     header: Header,
@@ -778,6 +780,7 @@ const DecodedPayload = struct {
 
     fn deinit(self: *DecodedPayload, alloc: Allocator) void {
         self.tabstops.deinit(alloc);
+        self.palette.deinit(alloc);
         alloc.free(self.pwd);
         alloc.free(self.title);
         self.* = undefined;
@@ -880,7 +883,8 @@ fn decodePayload(
     var override_mask: [32]u8 = undefined;
     try reader.readSliceAll(&override_mask);
 
-    var palette: terminal_color.DynamicPalette = .init(original);
+    var palette: terminal_color.DynamicPalette = try .init(alloc, original);
+    errdefer palette.deinit(alloc);
     for (0..256) |index| {
         const mask = @as(u8, 1) << @intCast(index % 8);
         if (override_mask[index / 8] & mask != 0) {
@@ -997,6 +1001,10 @@ pub fn decode(
         .default_cursor_blink = header.cursor_default_blink,
     });
     errdefer result.deinit(alloc);
+
+    // The terminal owns the decoded palette now, so the payload must not
+    // release it.
+    payload.palette = .default;
 
     // Recreate the optional screen now so ScreenSet routing is complete before
     // its empty screens are replaced by the following SCREEN records.
@@ -1209,11 +1217,12 @@ const test_header_fixture = test_fixture.parse(
 );
 
 test "TERMINAL mode bit layout" {
+    // 43 upstream modes plus witty's transient tmux_active.
     try std.testing.expectEqual(
-        @as(usize, 43),
+        @as(usize, 44),
         @bitSizeOf(terminal_modes.ModePacked),
     );
-    try std.testing.expectEqual(@as(usize, 42), @bitSizeOf(SnapshotModeBits));
+    try std.testing.expectEqual(@as(usize, 43), @bitSizeOf(SnapshotModeBits));
 
     var first: terminal_modes.ModePacked = std.mem.zeroes(
         terminal_modes.ModePacked,
@@ -1233,13 +1242,28 @@ test "TERMINAL mode bit layout" {
         @as(ModeBits, @bitCast(visibility)),
     );
 
+    var size_reports: terminal_modes.ModePacked = std.mem.zeroes(
+        terminal_modes.ModePacked,
+    );
+    size_reports.in_band_size_reports = true;
+    try std.testing.expectEqual(
+        @as(ModeBits, 1) << 41,
+        @as(ModeBits, @bitCast(size_reports)),
+    );
+
     var last: terminal_modes.ModePacked = std.mem.zeroes(
         terminal_modes.ModePacked,
     );
-    last.in_band_size_reports = true;
+    last.kitty_paste_events = true;
     try std.testing.expectEqual(
-        @as(ModeBits, 1) << 41,
+        @as(ModeBits, 1) << 42,
         @as(ModeBits, @bitCast(last)),
+    );
+    // The newest upstream mode is inside the stable registry, so snapshots
+    // preserve it.
+    try std.testing.expectEqual(
+        @as(SnapshotModeBits, 1) << 42,
+        @as(SnapshotModeBits, @truncate(@as(ModeBits, @bitCast(last)))),
     );
 
     var transient: terminal_modes.ModePacked = std.mem.zeroes(
@@ -1247,8 +1271,14 @@ test "TERMINAL mode bit layout" {
     );
     transient.tmux_active = true;
     try std.testing.expectEqual(
-        @as(ModeBits, 1) << 42,
+        @as(ModeBits, 1) << 43,
         @as(ModeBits, @bitCast(transient)),
+    );
+    // The transient fork mode falls outside the stable registry and is
+    // dropped from snapshots.
+    try std.testing.expectEqual(
+        @as(SnapshotModeBits, 0),
+        @as(SnapshotModeBits, @truncate(@as(ModeBits, @bitCast(transient)))),
     );
 }
 
@@ -1470,9 +1500,7 @@ test "TERMINAL payload round trip" {
     tabstops.set(test_header.columns - 1);
 
     // Use overrides at both ends of the palette to make ordering explicit.
-    var palette: terminal_color.DynamicPalette = .init(
-        terminal_color.default,
-    );
+    var palette: terminal_color.DynamicPalette = .default;
     palette.set(0, .{ .r = 1, .g = 2, .b = 3 });
     palette.set(255, .{ .r = 4, .g = 5, .b = 6 });
 
@@ -1537,9 +1565,7 @@ test "TERMINAL payload rejects noncanonical state" {
         0,
     );
     defer tabstops.deinit(testing.allocator);
-    var palette: terminal_color.DynamicPalette = .init(
-        terminal_color.default,
-    );
+    var palette: terminal_color.DynamicPalette = .default;
     var encoded: [2048]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&encoded);
     try testing.expectError(
@@ -1582,9 +1608,7 @@ test "TERMINAL payload ignores tab-stop padding" {
         0,
     );
     defer tabstops.deinit(testing.allocator);
-    var palette: terminal_color.DynamicPalette = .init(
-        terminal_color.default,
-    );
+    var palette: terminal_color.DynamicPalette = .default;
     palette.set(1, .{ .r = 1, .g = 2, .b = 3 });
 
     var destination: std.Io.Writer.Allocating = .init(testing.allocator);

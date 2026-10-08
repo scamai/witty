@@ -32,3 +32,6 @@ glad.zip
 vgcore.*
 
 /sprite_face_test*
+
+# macOS release output (macos/scripts/release.sh)
+/dist/Witty.dmg

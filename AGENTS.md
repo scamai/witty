@@ -15,6 +15,8 @@ A file for [guiding coding agents](https://agents.md/).
 - **Formatting (Zig)**: `zig fmt .`
 - **Formatting (Swift)**: `swiftlint lint --strict --fix`
 - **Formatting (other)**: `prettier -w .`
+- **Release (macOS DMG)**: `macos/scripts/release.sh` — signed, notarized,
+  stapled `dist/Witty.dmg`. See `macos/AGENTS.md` for prereqs and pitfalls.
 
 ## libghostty-vt
 

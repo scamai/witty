@@ -10,6 +10,40 @@
   - Output: `macos/build/<configuration>/Witty.app` (e.g. `macos/build/Debug/Witty.app`)
 - Run unit tests directly with `macos/build.nu --action test`
 
+## Release (signed + notarized DMG)
+
+- Full pipeline: `macos/scripts/release.sh`
+  - Builds ReleaseFast via zig + xcodebuild, re-signs every Mach-O
+    inside-out with Developer ID + secure timestamp, notarizes and staples
+    the app, builds and signs `dist/Witty.dmg`, notarizes and staples the
+    DMG, then runs `spctl` and `syspolicy_check distribution`.
+  - Env overrides: `ZIG`, `WITTY_SIGN_IDENTITY`, `WITTY_NOTARY_PROFILE`.
+- Signing identity: `WITTY_SIGN_IDENTITY`, else the keychain's only
+  "Developer ID Application" identity. With several (e.g. a personal and a
+  company team) the scripts stop and list them instead of guessing.
+  The certificate's team decides the publisher name users see, and changing
+  team changes the designated requirement, which resets every user's
+  Screen Recording / Accessibility grants once.
+- One-time prereqs: Developer ID Application cert in the login keychain,
+  and a notarytool profile for the same team (`xcrun notarytool
+  store-credentials "AC_NOTARY" --apple-id <id> --team-id <TEAMID>`, which
+  prompts for an app-specific password).
+- Pitfalls:
+  - `~/.local/bin/zig` is a 0.15.2 shim; `release.sh` auto-selects a zig
+    meeting `build.zig.zon`'s `minimum_zig_version` (currently brew's 0.16.0).
+  - Never notarize the xcodebuild product directly: manual signing adds no
+    secure timestamp and the notary rejects it. `package_release.sh` re-signs
+    inside-out (Sparkle XPCs first, `Downloader.xpc` keeps its entitlements).
+  - Staple the app, not just the DMG: a DMG ticket does not travel with the
+    app once it is dragged to /Applications, so an offline first launch fails.
+  - Both scripts warn when the signing certificate expires within 120 days
+    (`WITTY_CERT_WARN_DAYS`) and fail once it has expired.
+  - `release.sh` rebuilds `macos/build/ReleaseLocal/Witty.app` in place. If
+    the installed app is that bundle (or a symlink to it), quit Witty first.
+  - Repackaging an already-built app without rebuilding:
+    `macos/scripts/package_release.sh`; set `WITTY_APP` to package a copy.
+  - Signing-helper tests: `macos/scripts/test_lib_signing.sh`.
+
 ## AppleScript
 
 - The AppleScript scripting definition is in `macos/Ghostty.sdef`.

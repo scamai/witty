@@ -780,6 +780,13 @@ extension Ghostty {
             case GHOSTTY_ACTION_COPY_TITLE_TO_CLIPBOARD:
                 return copyTitleToClipboard(app, target: target)
 
+            case GHOSTTY_ACTION_SIZE_LIMIT, GHOSTTY_ACTION_QUIT_TIMER:
+                // The core sends both on every surface create/destroy. Neither
+                // applies here: quit-after-last-window-closed-delay is Linux-only
+                // and AppKit owns window sizing. Handled explicitly so they don't
+                // reach the default branch and log as unknown on every new tab.
+                return false
+
             default:
                 Ghostty.logger.warning("unknown action action=\(action.tag.rawValue, privacy: .public)")
                 return false

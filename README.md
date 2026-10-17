@@ -1,5 +1,8 @@
-<!-- LOGO -->
-<h1 align="center">witty</h1>
+<p align="center">
+  <img src="macos/Assets.xcassets/AppIconImage.imageset/macOS-AppIcon-256px-128pt@2x.png" width="128" alt="The Witty icon: a four-leaf clover on warm paper" />
+</p>
+
+<h1 align="center">Witty</h1>
 
 <p align="center">
   A <a href="https://github.com/ghostty-org/ghostty">Ghostty</a> fork with
@@ -10,50 +13,108 @@
 </p>
 
 <p align="center">
-  <a href="#what-witty-adds">What witty adds</a>
+  <a href="#install">Install</a>
+  ·
+  <a href="#what-witty-adds">What Witty adds</a>
   ·
   <a href="#quick-example">Quick example</a>
   ·
   <a href="docs/witty-altscreen.md">Docs</a>
   ·
-  <a href="#install">Install</a>
-  ·
-  <a href="#built-on-ghostty">Upstream</a>
+  <a href="https://github.com/scamai/witty/releases">Releases</a>
 </p>
 
 ---
 
-witty is [Ghostty](https://github.com/ghostty-org/ghostty) — the fast, native,
-feature-rich terminal emulator — plus **one** focused addition: the
-`altscreen:` keybind prefix. Everything else is stock Ghostty, merged from
-upstream regularly. If you don't use the new prefix, witty behaves exactly like
-Ghostty.
+Witty is [Ghostty](https://github.com/ghostty-org/ghostty) — the fast, native,
+feature-rich terminal emulator — plus one feature: the `altscreen:` keybind
+prefix. It also has what a separately installed app needs: its own name, icon,
+bundle identifier, config directory and signature. Everything else is Ghostty,
+merged from upstream regularly; [FORK.md](FORK.md) lists every difference. If
+you don't use the new prefix, Witty behaves like Ghostty.
 
-Witty is an independent fork of Ghostty, maintained by Reality Inc. It is not
+Witty is an independent open-source project of Reality Inc. It is not
 affiliated with or endorsed by the Ghostty project.
 
 ## Contents
 
-- [What witty adds](#what-witty-adds)
+- [Install](#install)
+  - [Upgrading from v0.1.x](#upgrading-from-v01x)
+  - [Next to Ghostty](#next-to-ghostty)
+  - [Build from source](#build-from-source)
+- [What Witty adds](#what-witty-adds)
 - [Quick example](#quick-example)
 - [How it works](#how-it-works)
 - [Recommended workflow: persistent remote dev](#recommended-workflow-persistent-remote-dev)
-- [Install](#install)
 - [Platform support](#platform-support)
 - [Built on Ghostty](#built-on-ghostty)
 - [License](#license)
 
-## What witty adds
+## Install
+
+Witty needs macOS 13 or later, on Apple silicon or Intel. Download the latest
+`Witty-<version>-macos-<arch>.dmg` from
+[Releases](https://github.com/scamai/witty/releases), open it and drag Witty to
+Applications. From v0.2.0 on, releases are signed with Reality Inc.'s
+Developer ID and notarized by Apple, so they open like any other downloaded
+app.
+
+On first launch Witty copies your Ghostty config, if you have one, to
+`~/.config/witty/config`. Ghostty's files are only read, never changed. The
+command-line tool inside the app keeps Ghostty's name, `ghostty`.
+
+### Upgrading from v0.1.x
+
+v0.1.0 and v0.1.1 were zip files whose app was named `Ghostty.app` and used
+Ghostty's bundle identifier, so macOS cannot tell them apart from Ghostty.
+After installing Witty:
+
+1. Open `/Applications/Ghostty.app` and choose **Ghostty → About Ghostty**. If
+   the version is **0.1**, it is the old Witty: quit it and move it to the
+   Trash. Any other version is the real Ghostty; keep it if you use it.
+2. Grant Witty again whatever you had allowed the old app, such as
+   Accessibility, Screen Recording or notifications. macOS treats Witty as a
+   new app.
+
+Your config comes along: the old build read `~/.config/ghostty`, which Witty
+imports on its first launch.
+
+### Next to Ghostty
+
+Witty and Ghostty can be installed side by side. Each has its own bundle
+identifier and config directories (`~/.config/witty` and
+`~/Library/Application Support/ai.scam.witty` for Witty, `~/.config/ghostty`
+and `~/Library/Application Support/com.mitchellh.ghostty` for Ghostty), so
+Witty-only settings such as `altscreen:` binds never reach Ghostty.
+
+### Build from source
+
+You need [Zig](https://ziglang.org) 0.16.0 or later (`minimum_zig_version` in
+`build.zig.zon`) and, for the macOS app, Xcode and gettext (`msgfmt`) on
+`PATH`.
+
+```sh
+zig build -Doptimize=ReleaseFast        # on macOS: macos/build/ReleaseLocal/Witty.app
+zig build run                           # build a debug app and launch it
+zig build test -Dtest-filter="<name>"   # prefer a filter; the full suite is slow
+```
+
+`macos/scripts/release.sh` makes the signed, notarized DMG; its prerequisites
+are in [`macos/AGENTS.md`](macos/AGENTS.md). Upstream's
+[`CONTRIBUTING.md`](CONTRIBUTING.md) and [`HACKING.md`](HACKING.md) cover the
+rest of the developer workflow.
+
+## What Witty adds
 
 A terminal has two screens: the **primary** screen (your shell, scrollback) and
 the **alternate** screen, which fullscreen programs like tmux, Neovim, `less`,
-or `htop` switch to while running. witty lets a single keybinding behave
+or `htop` switch to while running. Witty lets a single keybinding behave
 differently depending on which one is active.
 
 | Addition | What it does |
 | --- | --- |
 | **`altscreen:` keybind prefix** | Gate any binding to the **alternate screen** only. On the primary screen the lookup falls back to whatever that key was bound to before, so you lose nothing. |
-| **Default `cmd+ctrl+=` (macOS)** | On the primary screen: `equalize_splits` (balance Ghostty's own splits). On the alternate screen: send tmux `C-b E` (`select-layout -E`) so the **tmux panes** get evened out instead — because Ghostty can't resize panes that belong to tmux. |
+| **Default `cmd+ctrl+=` (macOS)** | On the primary screen: `equalize_splits` (balance Witty's own splits). On the alternate screen: send tmux `C-b E` (`select-layout -E`) so the **tmux panes** get evened out instead — because the terminal can't resize panes that belong to tmux. |
 | **Default `cmd+left` (macOS)** | Jump to the start of the line. On the alternate screen it sends **Home** (`CSI H`) instead of C-a, so it isn't swallowed by a `C-a` tmux prefix — `cmd+left` works the same inside tmux as at a bare shell. |
 
 ## Quick example
@@ -66,7 +127,7 @@ differently depending on which one is active.
 keybind = ctrl+r=reload_config
 keybind = altscreen:ctrl+r=text:\x02[
 
-# The macOS default that ships with witty — one key, two behaviors:
+# The macOS default that ships with Witty — one key, two behaviors:
 keybind = super+ctrl+equal=equalize_splits
 keybind = altscreen:super+ctrl+equal=text:\x02E   # C-b E → even out tmux panes
 ```
@@ -79,156 +140,51 @@ prefixes, non-tmux fullscreen apps).
 ## How it works
 
 The `altscreen:` prefix registers a binding on a separate, alternate-screen key
-table. On a key event, witty first consults that table when the terminal is on
+table. On a key event, Witty first consults that table when the terminal is on
 the alternate screen; if there's no match (or you're on the primary screen) it
 continues the normal lookup chain and falls back to the binding the key already
 had. The prefix never *adds* a key — it overlays behavior on a key you've
 already bound, which is what makes the tmux/non-tmux split clean.
 
-Full design notes, fallback semantics, and edge cases live in
+A binding fires only while a real tmux has said it is attached, not on every
+alternate screen, so Neovim or `less` running outside tmux keep the key's
+normal binding. Full design notes, fallback semantics, and edge cases live in
 **[docs/witty-altscreen.md](docs/witty-altscreen.md)**.
 
 ## Recommended workflow: persistent remote dev
 
-witty's altscreen bindings pay off most in a remote, persistent setup: keep the
-real work in **tmux on a server** and treat the local terminal as a disposable,
-reconnectable view.
-
-1. **SSH in and attach tmux** — the session lives on the server, not your laptop:
-
-   ```sh
-   ssh myserver -t 'tmux new -A -s main'
-   ```
-
-   `new -A -s main` attaches the `main` session if it exists, otherwise creates
-   it. Close the lid, drop Wi-Fi, or quit witty — the session and everything
-   running in it survive. Run the same command to reconnect and you're back
-   exactly where you left off.
-
-2. **Split panes and run Claude Code per pane** — split with witty's native
-   gestures, which keep working even while Claude or tmux owns the altscreen:
-
-   ```
-   cmd+d         split right
-   cmd+shift+d   split down
-   cmd+ctrl+=    equalize panes
-   cmd+w         close the pane
-   ```
-
-   In each new pane, repeat the SSH + attach from step 1 with its own session
-   name (`agent2`, `agent3`, …) and run `claude`. Each pane is an independent
-   agent you can glance across — the split grid is local, so you rebuild it on
-   reconnect, but every agent keeps running server-side and re-attaching drops
-   you right back in.
-
-3. **Keep shortcuts consistent** — point tmux's pane keys at the same gestures
-   you use in Ghostty, and let witty's altscreen bindings cover the keys tmux
-   would otherwise swallow. A minimal `~/.tmux.conf`:
-
-   ```tmux
-   # screen-style prefix (closer to the home row)
-   set -g prefix C-a
-   unbind C-b
-   bind C-a send-prefix
-
-   # Ghostty-like pane navigation: Shift+Alt+arrow, no prefix needed
-   bind -n M-S-Left  select-pane -L
-   bind -n M-S-Right select-pane -R
-   bind -n M-S-Up    select-pane -U
-   bind -n M-S-Down  select-pane -D
-
-   # modern key reporting so Ghostty's modified keys arrive intact
-   set -s extended-keys always
-
-   # tell witty a real tmux is live so altscreen: keybinds fire, and re-arm that
-   # signal on every (re)attach — step 1's `tmux new -A` re-attaches an existing
-   # session without redrawing a prompt, which would otherwise leave the keys dead
-   set -g allow-passthrough on
-   set-hook -g client-attached 'run-shell -b "printf \"\\033[?8771h\" > #{client_tty}"'
-   ```
-
-   Pair the tmux config above with the matching **per-prompt shell signal** (a
-   few lines in `~/.zshrc`/`~/.bashrc`) — see
-   [docs/witty-altscreen.md](docs/witty-altscreen.md#setting-the-signal-from-your-shell).
-   Without the signal, the `altscreen:` keybinds never fire and every key keeps
-   its normal binding (a safe, opt-in default).
-
-   `cmd+left` already works under **any** prefix — on the alternate screen witty
-   sends **Home** (`CSI H`), which no tmux prefix can intercept.
-
-   `cmd+ctrl+=` is different: "even out panes" *must* go through the tmux prefix,
-   and the shipped default targets tmux's **default** prefix (`C-b`). With the
-   `C-a` prefix above, the default `C-b E` never reaches tmux — add one line to
-   your Witty config to retarget it (and any other prefix-based keys) at `C-a`:
-
-   ```ini
-   # ~/.config/witty/config — use C-a (0x01) instead of the C-b default
-   keybind = altscreen:super+ctrl+equal=text:\x01E   # C-a E → even tmux panes
-   ```
-
-   See [docs/witty-altscreen.md](docs/witty-altscreen.md) for the prefix caveat
-   and more bindings you can mirror this way. Same muscle memory whether or not
-   tmux is in the loop.
-
-## Install
-
-witty is currently macOS-focused (the shipped default binding is macOS). Linux
-(GTK) builds the same way as upstream Ghostty.
-
-**Prebuilt macOS app** — grab the latest `Witty-<version>-macos-<arch>.dmg`
-from the [Releases](https://github.com/scamai/witty/releases) page, open it and
-drag Witty into `/Applications`. Builds from v0.2 on are signed with Reality Inc.'s
-Developer ID and notarized by Apple; the v0.1.x zips were ad-hoc signed. (The app installs the same
-`ghostty` CLI but reads its own config, `~/.config/witty/config`. On first
-launch it copies an existing Ghostty config there, so your setup carries
-over.)
-
-**Next to Ghostty** — Witty and Ghostty can be installed side by side. Their
-config directories are separate (`~/.config/witty` and
-`~/Library/Application Support/ai.scam.witty` for Witty, `~/.config/ghostty`
-and `~/Library/Application Support/com.mitchellh.ghostty` for Ghostty), so
-Witty-only settings such as `altscreen:` binds never reach Ghostty, and each
-app has its own bundle identifier.
-
-**Build from source** — requires [Zig](https://ziglang.org) `0.15.2` (see
-`.zig-version` / `minimum_zig_version` in `build.zig.zon`):
+Witty's altscreen bindings pay off most when the real work lives in **tmux on a
+server** and the local terminal is a disposable view you can reconnect:
 
 ```sh
-# core build (and the underlying library)
-zig build
-
-# run the test suite (prefer a filter; the full suite is slow)
-zig build test -Dtest-filter="<name>"
+ssh myserver -t 'tmux new -A -s main'
 ```
 
-macOS app bundle (needs Xcode + gettext on `PATH` for `msgfmt`):
+`new -A -s main` attaches the `main` session, or creates it. Close the lid,
+drop Wi-Fi or quit Witty, and everything keeps running; the same command picks
+up where you left off. Split with Witty's own keys (`cmd+d`, `cmd+shift+d`,
+`cmd+ctrl+=` to equalize, `cmd+w`), attach a session per pane, and run an agent
+such as Claude Code in each.
 
-```sh
-# 1) rebuild the xcframework with your changes
-zig build -Demit-xcframework=true -Demit-macos-app=false -Dapp-runtime=none -Doptimize=ReleaseFast
-# 2) build the app
-xcodebuild -project macos/Ghostty.xcodeproj -scheme Ghostty \
-  -configuration ReleaseLocal SYMROOT="$PWD/macos/build" build
-# -> macos/build/ReleaseLocal/Ghostty.app
-```
-
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`HACKING.md`](HACKING.md) (from
-upstream) for the full developer workflow.
+[docs/witty-remote-workflow.md](docs/witty-remote-workflow.md) walks through the
+whole setup: the `~/.tmux.conf` that tells Witty tmux is running, pane keys
+that match Witty's, and the one-line change `cmd+ctrl+=` needs when your tmux
+prefix is `C-a`.
 
 ## Platform support
 
-| Platform | witty app | Notes |
+| Platform | Witty app | Notes |
 | --- | --- | --- |
-| **macOS** (Apple Silicon) | ✅ | Primary target. The shipped altscreen defaults are macOS keybinds. |
-| **Linux** (GTK) | ✅ | Builds like upstream Ghostty. The `altscreen:` prefix works; no default binding uses it, so add your own. |
-| **Windows** | ❌ no app | Ghostty/witty have **no native Windows application** — the GUI runtimes are GTK (Linux) and SwiftUI (macOS) only. The core `libghostty` / `libghostty-vt` engine *does* compile for Windows (with ConPTY support) and can be embedded, but there is no `witty.exe` to run. |
+| **macOS** 13 or later | ✅ | Primary target; releases are universal (Apple silicon and Intel). The shipped altscreen defaults are macOS keybinds. |
+| **Linux** (GTK) | ✅ from source | Builds like upstream Ghostty; no packages are published. The `altscreen:` prefix works; no default binding uses it, so add your own. The GTK app still uses Ghostty's application ID, so don't install it next to Ghostty ([FORK.md](FORK.md#deliberately-not-changed)). |
+| **Windows** | ❌ no app | Ghostty and Witty have **no native Windows application** — the GUI runtimes are GTK (Linux) and SwiftUI (macOS) only. The core `libghostty` / `libghostty-vt` engine *does* compile for Windows (with ConPTY support) and can be embedded, but there is no `witty.exe` to run. |
 
 **On Windows?** The [recommended workflow](#recommended-workflow-persistent-remote-dev)
-above still works — the real session lives in **tmux on a Linux server**, and the
+still works — the real session lives in **tmux on a Linux server**, and the
 local terminal is just an SSH client. Use **Windows Terminal** or a **WSL** shell
-to `ssh` in and `tmux attach`. You won't get witty's altscreen keybindings
-locally (those are a witty feature), but you can reproduce the important ones as
-Windows Terminal or tmux bindings. Everything server-side — panes, Claude Code,
+to `ssh` in and `tmux attach`. You won't get Witty's altscreen keybindings
+locally, but you can reproduce the important ones as Windows Terminal or tmux
+bindings. Everything server-side — panes, Claude Code,
 reconnect-after-disconnect — is identical.
 
 ## Built on Ghostty

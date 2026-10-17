@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Docs
+
+- **The README starts with installing**, including how to retire a v0.1.x
+  `Ghostty.app`, and its build steps now name Zig 0.16 and `Witty.app` (they
+  still said Zig 0.15.2 and `Ghostty.app`). The tmux walkthrough moved to
+  [`docs/witty-remote-workflow.md`](docs/witty-remote-workflow.md).
+
 ## [witty-v0.2.0] — 2026-10-17
 
 The first release since witty-v0.1.1, and the first one signed with Reality

@@ -149,6 +149,7 @@ All Witty-only files.
 | `FORK.md` | This file. |
 | `CHANGELOG.md` | Witty's changes on top of upstream. |
 | `docs/witty-altscreen.md` | The `altscreen:` prefix and the tmux setup it needs. |
+| `docs/witty-remote-workflow.md` | The persistent remote-dev setup with tmux, moved out of the README. |
 | `LICENSE` | Ghostty's MIT notice unchanged, plus `Copyright (c) 2026 Reality Inc.` for Witty's modifications. |
 
 ## Deliberately not changed
@@ -183,10 +184,13 @@ All Witty-only files.
 - **`macos/Sources/Features/Settings/SettingsView.swift`** still names
   `~/.config/ghostty/config.ghostty`. Nothing shows this view; it is only used
   by its own preview.
-- **User-visible text in the GTK app and the Zig core**, such as the GTK
-  About dialog and the command palette's `Ghostty` entry that types a `👻`
-  (`src/input/command.zig`). These strings go through gettext, where a new
-  msgid drops every translation of it, and Witty ships no Linux packages.
+- **User-visible text in the GTK app and the Zig core**: the GTK app's
+  dialogs, the command palette's `Ghostty` entry that types a `👻`
+  (`src/input/command.zig`), and messages of the `ghostty` CLI such as the
+  `+list-themes` preview title. The GTK and palette strings go through
+  gettext, where a new msgid drops every translation of it; the CLI keeps
+  Ghostty's name along with its executable name. Witty ships no Linux
+  packages.
 - **`src/extra/vim.zig`** detects the `ghostty` filetype for `*/ghostty/config`
   but not `*/witty/config`. Files named `config.ghostty` are still detected.
 - **Upstream's release workflows** (`.github/workflows/release-tag.yml`,

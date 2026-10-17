@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **New app icon: a four-leaf clover on warm paper.** Its four leaves sit in the four quadrants,
+  so the gap between them reads as a 2×2 split of terminal panes, and a `>_` prompt sits on the
+  top-left leaf. It replaces the violet `W` on upstream's CRT frame. The in-app image and the
+  tintable glyph of the custom Dock icon change with it, so no ghost remains in the default
+  artwork. `images/witty-icon-src/draw_clover.swift` regenerates every piece.
 - **Witty now has its own config, state and cache directories**, so it can be
   installed next to Ghostty without either app reading the other's files. The
   config lives in `~/.config/witty/` (was `~/.config/ghostty/`) and, on macOS,

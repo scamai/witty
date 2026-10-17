@@ -9,6 +9,7 @@ const DiskCache = @import("ssh_cache.zig").DiskCache;
 const internal_os = @import("../os/main.zig");
 const terminfopkg = @import("../terminfo/main.zig");
 const global = @import("../global.zig");
+const user_dir = @import("../build_config.zig").user_dir;
 
 const log = std.log.scoped(.ssh);
 
@@ -244,7 +245,7 @@ fn runInner(
         };
 
         const cache: ?DiskCache = if (opts.cache) cache: {
-            const path = DiskCache.defaultPath(alloc, "ghostty") catch |err| {
+            const path = DiskCache.defaultPath(alloc, user_dir.xdg) catch |err| {
                 warnPrint(stderr, "ghostty terminfo cache unavailable: {t}", .{err});
                 break :session .{ .term = "xterm-256color" };
             };

@@ -56,7 +56,7 @@ differently depending on which one is active.
 ## Quick example
 
 ```ini
-# ~/.config/ghostty/config
+# ~/.config/witty/config
 
 # ctrl+r reloads the config on the normal screen,
 # but enters tmux copy-mode (C-b [) when tmux is in the foreground:
@@ -156,10 +156,10 @@ reconnectable view.
    `cmd+ctrl+=` is different: "even out panes" *must* go through the tmux prefix,
    and the shipped default targets tmux's **default** prefix (`C-b`). With the
    `C-a` prefix above, the default `C-b E` never reaches tmux — add one line to
-   your Ghostty config to retarget it (and any other prefix-based keys) at `C-a`:
+   your Witty config to retarget it (and any other prefix-based keys) at `C-a`:
 
    ```ini
-   # ~/.config/ghostty/config — use C-a (0x01) instead of the C-b default
+   # ~/.config/witty/config — use C-a (0x01) instead of the C-b default
    keybind = altscreen:super+ctrl+equal=text:\x01E   # C-a E → even tmux panes
    ```
 
@@ -175,7 +175,9 @@ witty is currently macOS-focused (the shipped default binding is macOS). Linux
 **Prebuilt macOS app** — grab the latest `Witty.app` (Apple Silicon,
 ad-hoc signed) from the [Releases](https://github.com/shenxingy/witty/releases)
 page, unzip, and drop it into `/Applications`. (The app installs the same
-`ghostty` CLI and reads `~/.config/ghostty`, so existing config just works.)
+`ghostty` CLI but reads its own config, `~/.config/witty/config`. On first
+launch it copies an existing Ghostty config there, so your setup carries
+over.)
 
 **Build from source** — requires [Zig](https://ziglang.org) `0.15.2` (see
 `.zig-version` / `minimum_zig_version` in `build.zig.zon`):

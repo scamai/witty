@@ -26,6 +26,7 @@ const cli = @import("../cli.zig");
 const conditional = @import("conditional.zig");
 const Conditional = conditional.Conditional;
 const file_load = @import("file_load.zig");
+const ghostty_import = @import("ghostty_import.zig");
 const formatterpkg = @import("formatter.zig");
 const themepkg = @import("theme.zig");
 const url = @import("url.zig");
@@ -4193,6 +4194,11 @@ fn writeConfigTemplate(path: []const u8) !void {
 /// The legacy `config` file (without extension) is first loaded,
 /// then `config.ghostty`.
 pub fn loadDefaultFiles(self: *Config, alloc: Allocator) !void {
+    // Witty: copy an existing Ghostty config the first time Witty runs.
+    // This must run before the template below is written, because the
+    // template would count as Witty's config and stop the import.
+    ghostty_import.importDefault(alloc);
+
     // Load XDG first
     const legacy_xdg_path = try file_load.legacyDefaultXdgPath(alloc);
     defer alloc.free(legacy_xdg_path);

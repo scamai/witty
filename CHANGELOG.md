@@ -6,6 +6,27 @@ documented here. Upstream Ghostty changes are not duplicated; see
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Changed
+
+- **Witty now has its own config, state and cache directories**, so it can be
+  installed next to Ghostty without either app reading the other's files. The
+  config lives in `~/.config/witty/` (was `~/.config/ghostty/`) and, on macOS,
+  `~/Library/Application Support/<Witty's bundle ID>/`; crash reports and the
+  SSH terminfo cache in `$XDG_STATE_HOME/witty/`; the Sentry cache in
+  `$XDG_CACHE_HOME/witty/`. The default `macos-custom-icon` path is now
+  `~/.config/witty/Ghostty.icns`.
+- **On first launch Witty imports an existing Ghostty config.** If Witty has no
+  config file and Ghostty has one, Witty copies Ghostty's config files into its
+  own directories, including files pulled in with relative `config-file =`
+  includes and the user `themes/` directory. Ghostty's files are only read,
+  never changed; an existing Witty file is never overwritten; every copied
+  file is logged. Includes given as absolute or `~/` paths are left in place
+  and logged. Ghostty's config itself is untouched, so if it includes
+  Witty-only `altscreen:` binds, remove that include from
+  `~/.config/ghostty/config` by hand to make stock Ghostty validate again.
+
 ## [witty-v0.1.3] — 2026-09-19
 
 Synced with upstream Ghostty at `b32f20f3e` (2026-09-19) — 793 commits since

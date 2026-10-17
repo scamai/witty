@@ -219,11 +219,11 @@ the escape is an unknown mode and is harmlessly ignored.
   one shipped default that is prefix-*dependent* — "even out panes" has to go
   through the tmux prefix, and `\x02` is `C-b`. If you remapped your prefix
   (e.g. screen-style `C-a`), the default `C-b E` is just sent to the shell and
-  does nothing. Override it in your Ghostty config with the matching control
+  does nothing. Override it in your Witty config with the matching control
   byte (`\x01` = `C-a`, `\x02` = `C-b`, …):
 
   ```ini
-  # ~/.config/ghostty/config — for a C-a tmux prefix
+  # ~/.config/witty/config — for a C-a tmux prefix
   keybind = altscreen:super+ctrl+equal=text:\x01E   # C-a E → even tmux panes
   ```
 

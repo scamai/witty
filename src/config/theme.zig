@@ -4,6 +4,7 @@ const Allocator = std.mem.Allocator;
 const internal_os = @import("../os/main.zig");
 const cli = @import("../cli.zig");
 const global = @import("../global.zig");
+const user_dir = @import("../build_config.zig").user_dir;
 
 /// Location of possible themes. The order of this enum matters because it
 /// defines the priority of theme search (from top to bottom).
@@ -29,7 +30,7 @@ pub const Location = enum {
         return switch (self) {
             .user => user: {
                 const subdir = std.fs.path.join(arena_alloc, &.{
-                    "ghostty", "themes",
+                    user_dir.xdg, "themes",
                 }) catch return error.OutOfMemory;
 
                 break :user internal_os.xdg.config(

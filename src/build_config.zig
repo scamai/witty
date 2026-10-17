@@ -55,7 +55,27 @@ pub const i18n: bool = config.i18n;
 /// There are many places that don't use this variable so simply swapping
 /// this variable is NOT ENOUGH to change the bundle ID. I just wanted to
 /// avoid it in Zig coe as much as possible.
+///
+/// Witty: this stays upstream's value on purpose. It also names files in
+/// the resources layout (the gettext domain, the GTK icons) and the
+/// unified-logging subsystem. Witty's own per-user directories come from
+/// `user_dir` below instead.
 pub const bundle_id = "com.mitchellh.ghostty";
+
+/// Witty: the names of the per-user directories Witty reads and writes.
+/// They differ from upstream Ghostty's ("ghostty" and `bundle_id`) so that
+/// Witty never reads Ghostty's config or writes its state, and the two can
+/// be installed side by side. `config/ghostty_import.zig` copies an
+/// existing Ghostty config over once.
+pub const user_dir = struct {
+    /// Under $XDG_CONFIG_HOME, $XDG_STATE_HOME and $XDG_CACHE_HOME
+    /// (~/.config/witty, ~/.local/state/witty, ~/.cache/witty).
+    pub const xdg = "witty";
+
+    /// Under ~/Library/Application Support and ~/Library/Caches on macOS.
+    /// It matches the macOS app's bundle identifier.
+    pub const macos = "dev.shenxingy.witty";
+};
 
 /// True if we should have "slow" runtime safety checks. The initial motivation
 /// for this was terminal page/pagelist integrity checks. These were VERY

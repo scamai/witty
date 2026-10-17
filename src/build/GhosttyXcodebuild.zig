@@ -84,6 +84,12 @@ pub fn init(
             "CODE_SIGN_STYLE=Manual",
         });
 
+        // Witty: the updater's feed and key, which the Info.plist reads as
+        // $(WITTY_UPDATE_FEED_URL) and $(WITTY_UPDATE_PUBLIC_ED_KEY). Unset,
+        // they expand to empty and the app keeps its updater off.
+        if (config.macos_update_feed_url) |v| step.addArg(b.fmt("WITTY_UPDATE_FEED_URL={s}", .{v}));
+        if (config.macos_update_public_ed_key) |v| step.addArg(b.fmt("WITTY_UPDATE_PUBLIC_ED_KEY={s}", .{v}));
+
         // If we have a specific architecture, we need to pass it
         // to xcodebuild.
         if (xc_arch) |arch| step.addArgs(&.{ "-arch", arch });

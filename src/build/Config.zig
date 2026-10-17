@@ -75,6 +75,12 @@ vt_features: TerminalBuildOptions.Features = .{},
 /// stable signing identity here makes those grants survive rebuilds.
 macos_sign_identity: ?[]const u8 = null,
 
+/// Witty: the Sparkle appcast URL and the EdDSA public key that verifies
+/// it. Both default to null, and the macOS app turns its updater off
+/// unless both are set, so a build never offers anyone else's updates.
+macos_update_feed_url: ?[]const u8 = null,
+macos_update_public_ed_key: ?[]const u8 = null,
+
 /// True when Ghostty is being built as a dependency of another project
 /// rather than as the root project.
 is_dep: bool = false,
@@ -579,6 +585,28 @@ pub fn init(b: *std.Build, appVersion: []const u8, libVersion: []const u8) !Conf
         )) |v| break :ident if (v.len > 0) v else null;
         const v = env.get("WITTY_CODE_SIGN_IDENTITY") orelse break :ident null;
         break :ident if (v.len > 0) v else null;
+    };
+
+    config.macos_update_feed_url = url: {
+        if (b.option(
+            []const u8,
+            "macos-update-feed-url",
+            "Sparkle appcast URL for the macOS app's updater. Defaults to " ++
+                "$WITTY_UPDATE_FEED_URL. The updater is off unless this and the key are set.",
+        )) |v| break :url if (v.len > 0) v else null;
+        const v = env.get("WITTY_UPDATE_FEED_URL") orelse break :url null;
+        break :url if (v.len > 0) v else null;
+    };
+
+    config.macos_update_public_ed_key = key: {
+        if (b.option(
+            []const u8,
+            "macos-update-public-ed-key",
+            "EdDSA public key that verifies the update feed. Defaults to " ++
+                "$WITTY_UPDATE_PUBLIC_ED_KEY. The updater is off unless this and the URL are set.",
+        )) |v| break :key if (v.len > 0) v else null;
+        const v = env.get("WITTY_UPDATE_PUBLIC_ED_KEY") orelse break :key null;
+        break :key if (v.len > 0) v else null;
     };
 
     //---------------------------------------------------------------

@@ -12,6 +12,9 @@
 #                        "Developer ID Application" identity; required when
 #                        there are several)
 #   WITTY_NOTARY_PROFILE notarytool keychain profile (default: AC_NOTARY)
+#   WITTY_UPDATE_FEED_URL, WITTY_UPDATE_PUBLIC_ED_KEY
+#                        Witty's Sparkle appcast URL and its EdDSA public key.
+#                        Without both, the release has its updater turned off.
 #
 # One-time prereqs:
 #   1. Developer ID Application cert in the login keychain
@@ -37,6 +40,13 @@ IDENTITY="$(resolve_sign_identity)"
 PROFILE="${WITTY_NOTARY_PROFILE:-AC_NOTARY}"
 # Fail before a several-minute build, not after it.
 check_cert_validity "$IDENTITY"
+
+# zig build reads both from the environment; the app's updater stays off
+# unless it gets the two together.
+if [ -z "${WITTY_UPDATE_FEED_URL:-}" ] || [ -z "${WITTY_UPDATE_PUBLIC_ED_KEY:-}" ]; then
+  echo "warning: WITTY_UPDATE_FEED_URL and WITTY_UPDATE_PUBLIC_ED_KEY are not both set;" \
+    "this release ships with its updater turned off" >&2
+fi
 
 # Pick a zig that meets the repo's minimum version.
 REQUIRED_ZIG="$(grep -oE 'minimum_zig_version = "[0-9.]+"' "$REPO_ROOT/build.zig.zon" | grep -oE '[0-9.]+' | head -1)"

@@ -18,7 +18,9 @@ extension Ghostty {
 
         /// True if this can be performed on this target.
         var isSupported: Bool {
-            !Self.unsupportedActionKeys.contains(actionKey)
+            // Witty: no "Check for Updates" while this build has no update feed.
+            if actionKey == "check_for_updates" && !UpdateController.isConfigured { return false }
+            return !Self.unsupportedActionKeys.contains(actionKey)
         }
 
         /// Unsupported action keys, because they either don't make sense in the context of our

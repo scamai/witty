@@ -32,6 +32,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   as Screen Recording and Accessibility have to be given again, and settings
   stored under the old identifier (UserDefaults) do not carry over.
 
+### Fixed
+
+- **"Check for Updates…" no longer offers Ghostty's builds.** The updater
+  pointed at Ghostty's tip and release appcasts and trusted Ghostty's EdDSA
+  key. The feed URL and key are now Witty build settings
+  (`WITTY_UPDATE_FEED_URL`, `WITTY_UPDATE_PUBLIC_ED_KEY`) that default to
+  empty, and until a build sets both, the updater is off: it never checks,
+  makes no network requests, and the menu item and command palette entry are
+  hidden. `auto-update-channel` has no effect, since Witty has one feed.
+
 ## [witty-v0.1.3] — 2026-09-19
 
 Synced with upstream Ghostty at `b32f20f3e` (2026-09-19) — 793 commits since

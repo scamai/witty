@@ -9,6 +9,23 @@ import SwiftUI
 /// for managing updates with Ghostty's custom driver and delegate. It handles
 /// initialization, starting the updater, and provides the check for updates action.
 class UpdateController {
+    /// Witty: the update feed and the EdDSA public key that verifies it are Witty's own,
+    /// read from the Info.plist keys `SUFeedURL` and `SUPublicEDKey`. The build fills them
+    /// from the `WITTY_UPDATE_FEED_URL` and `WITTY_UPDATE_PUBLIC_ED_KEY` build settings,
+    /// which default to empty. Until both are set the updater stays off: Sparkle is never
+    /// started, so it schedules no checks and makes no network requests, and
+    /// "Check for Updates…" is hidden.
+    static let feedURL: String? = infoString("SUFeedURL")
+    static let publicEDKey: String? = infoString("SUPublicEDKey")
+    static var isConfigured: Bool { feedURL != nil && publicEDKey != nil }
+
+    private static func infoString(_ key: String) -> String? {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        // An unexpanded "$(SETTING)" placeholder is as unset as an empty value.
+        return trimmed.isEmpty || trimmed.hasPrefix("$(") ? nil : trimmed
+    }
+
     private(set) var updater: SPUUpdater
     private let userDriver: UpdateDriver
 
@@ -40,6 +57,11 @@ class UpdateController {
     /// This must be called before the updater can check for updates. If starting fails,
     /// the error will be shown to the user.
     func startUpdater() {
+        guard Self.isConfigured else {
+            AppDelegate.logger.info("updater disabled: no Witty update feed and key in this build")
+            return
+        }
+
         do {
             try updater.start()
         } catch {
@@ -60,6 +82,8 @@ class UpdateController {
     ///
     /// This is typically connected to a menu item action.
     func checkForUpdates() {
+        guard Self.isConfigured else { return }
+
         // If we're already idle, then just check for updates immediately.
         if viewModel.state == .idle {
             updater.checkForUpdates()

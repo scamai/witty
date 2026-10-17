@@ -106,8 +106,10 @@
 	</array>
 	<key>SUEnableAutomaticChecks</key>
 	<false/>
+	<key>SUFeedURL</key>
+	<string>$(WITTY_UPDATE_FEED_URL)</string>
 	<key>SUPublicEDKey</key>
-	<string>wsNcGf5hirwtdXMVnYoxRIX/SqZQLMOsYlD3q3imeok=</string>
+	<string>$(WITTY_UPDATE_PUBLIC_ED_KEY)</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

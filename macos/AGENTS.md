@@ -18,6 +18,13 @@
     the app, builds and signs `dist/Witty.dmg`, notarizes and staples the
     DMG, then runs `spctl` and `syspolicy_check distribution`.
   - Env overrides: `ZIG`, `WITTY_SIGN_IDENTITY`, `WITTY_NOTARY_PROFILE`.
+- Updater: Sparkle runs only when the build gets both Witty's appcast URL
+  and the EdDSA public key that verifies it: `WITTY_UPDATE_FEED_URL` and
+  `WITTY_UPDATE_PUBLIC_ED_KEY` (env, or `-Dmacos-update-feed-url` /
+  `-Dmacos-update-public-ed-key`), written to the Info.plist `SUFeedURL` and
+  `SUPublicEDKey`. With either missing the updater is off: no checks, no
+  network requests, and "Check for Updates…" is hidden. Never reuse
+  Ghostty's appcast or key.
 - Signing identity: `WITTY_SIGN_IDENTITY`, else the keychain's only
   "Developer ID Application" identity. With several (e.g. a personal and a
   company team) the scripts stop and list them instead of guessing.

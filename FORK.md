@@ -123,6 +123,7 @@ All Witty-only files.
 | `macos/scripts/release.sh` | ReleaseFast build, Developer ID signing, DMG, notarization, stapling. Warns when the updater settings are missing. |
 | `macos/scripts/package_release.sh` | Re-signs inside-out with a secure timestamp, notarizes and staples app and DMG. A `witty-v*` tag names the DMG `Witty-<version>-macos-<arch>.dmg`. |
 | `macos/scripts/lib_signing.sh`, `macos/scripts/test_lib_signing.sh` | Signing identity resolution, certificate expiry checks, notarization, the release asset name, and their tests. |
+| `src/build/GitVersion.zig` | Skips `witty-v*` tags when it detects the core's version. Upstream's `Config.zig` panics when the built commit carries any tag other than a `vX.Y.Z` matching `build.zig.zon`, so without this a tagged Witty release cannot be built. |
 | `macos/AGENTS.md` | Release prerequisites, pitfalls and settings. |
 | `AGENTS.md` | Points at the release script. |
 | `.gitignore` | Ignores the DMGs in `dist/`. |

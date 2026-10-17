@@ -57,6 +57,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Internal
 
+- **A tagged commit builds again.** Upstream's build stops with "tagged
+  releases must be in vX.Y.Z format matching build.zig" when the commit carries
+  any other tag, which included every `witty-v*` tag. `src/build/GitVersion.zig`
+  now skips Witty's tags; they version the app, not the Ghostty core.
 - **Release assets are named `Witty-<version>-macos-<arch>.dmg`.** When HEAD
   carries a `witty-v*` tag (or `WITTY_RELEASE_TAG` names one),
   `macos/scripts/package_release.sh` writes `dist/Witty-v0.1.4-macos-universal.dmg`

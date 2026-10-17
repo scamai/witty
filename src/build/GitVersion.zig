@@ -53,8 +53,10 @@ pub fn detect(b: *std.Build) !Version {
         break :short_hash std.mem.trimEnd(u8, output, "\r\n ");
     };
 
+    // Witty: witty-v* tags version the macOS app, not this core, so they are
+    // not candidates here; Config.zig would reject them as malformed releases.
     const tag = b.runAllowFail(
-        &[_][]const u8{ "git", "-C", b.build_root.path orelse ".", "describe", "--exact-match", "--tags" },
+        &[_][]const u8{ "git", "-C", b.build_root.path orelse ".", "describe", "--exact-match", "--tags", "--exclude", "witty-v*" },
         &code,
         .ignore,
     ) catch |err| switch (err) {

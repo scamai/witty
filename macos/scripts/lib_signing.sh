@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Shared signing helpers for release.sh and package_release.sh. Source it.
+# Shared signing and packaging helpers for release.sh and package_release.sh.
+# Source it.
 
 # Days of remaining validity below which a release warns about the signing
 # certificate. Already-shipped builds keep working after expiry (they carry a
@@ -60,6 +61,37 @@ check_cert_validity_pem() {
 
 check_cert_validity() {
   security find-certificate -c "$1" -p 2>/dev/null | check_cert_validity_pem "$1"
+}
+
+# Print the file name to publish the DMG under: Witty-<version>-macos-<arch>.dmg,
+# e.g. Witty-v0.1.4-macos-universal.dmg. $1 is the release tag (a leading
+# "witty-" is dropped), $2 the architectures `lipo -archs` reports for the app.
+# Release assets are always Witty-*, never the Ghostty-* names of the v0.1.x zips.
+release_dmg_name() {
+  local version="${1#witty-}" arm=0 intel=0 arch a
+  if [ -z "$version" ]; then
+    echo "error: no release tag to name the DMG after" >&2
+    return 1
+  fi
+  # Split on purpose: lipo separates the names with spaces. A plain word list
+  # also keeps bash 3.2 (/bin/bash) happy under `set -u` when it is empty.
+  # shellcheck disable=SC2086
+  for a in $2; do
+    case "$a" in
+      arm64*) arm=1 ;;
+      x86_64*) intel=1 ;;
+    esac
+  done
+  case "$arm$intel" in
+    11) arch=universal ;;
+    10) arch=arm64 ;;
+    01) arch=x86_64 ;;
+    *)
+      echo "error: unexpected app architectures: '$2'" >&2
+      return 1
+      ;;
+  esac
+  echo "Witty-${version}-macos-${arch}.dmg"
 }
 
 # Submit a file to the notary service and fail unless Apple accepts it.

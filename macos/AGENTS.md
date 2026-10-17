@@ -15,9 +15,15 @@
 - Full pipeline: `macos/scripts/release.sh`
   - Builds ReleaseFast via zig + xcodebuild, re-signs every Mach-O
     inside-out with Developer ID + secure timestamp, notarizes and staples
-    the app, builds and signs `dist/Witty.dmg`, notarizes and staples the
+    the app, builds and signs `dist/Witty.dmg` (named for upload when
+    tagged, see below), notarizes and staples the
     DMG, then runs `spctl` and `syspolicy_check distribution`.
   - Env overrides: `ZIG`, `WITTY_SIGN_IDENTITY`, `WITTY_NOTARY_PROFILE`.
+  - Release asset: when HEAD carries a `witty-v*` tag (or `WITTY_RELEASE_TAG`
+    names one), the DMG is `dist/Witty-<version>-macos-<arch>.dmg`, e.g.
+    `Witty-v0.1.4-macos-universal.dmg`; upload that file. Never publish a
+    `Ghostty-…` name: the v0.1.x `Ghostty-witty-…-macos-arm64.zip` assets
+    were packaged outside this repository, not by these scripts.
 - Updater: Sparkle runs only when the build gets both Witty's appcast URL
   and the EdDSA public key that verifies it: `WITTY_UPDATE_FEED_URL` and
   `WITTY_UPDATE_PUBLIC_ED_KEY` (env, or `-Dmacos-update-feed-url` /

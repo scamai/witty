@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Full Witty release pipeline: ReleaseFast build → Developer ID re-sign →
-# DMG → notarize → staple. Produces dist/Witty.dmg, verified distributable.
+# DMG → notarize → staple. Produces dist/Witty.dmg, verified distributable
+# (dist/Witty-<version>-macos-<arch>.dmg when HEAD carries a witty-v* tag).
 #
 # Usage:
 #   macos/scripts/release.sh

@@ -33,5 +33,6 @@ vgcore.*
 
 /sprite_face_test*
 
-# macOS release output (macos/scripts/release.sh)
-/dist/Witty.dmg
+# macOS release output (macos/scripts/release.sh): Witty.dmg, or
+# Witty-<version>-macos-<arch>.dmg for a tagged release
+/dist/Witty*.dmg

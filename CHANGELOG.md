@@ -42,6 +42,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   makes no network requests, and the menu item and command palette entry are
   hidden. `auto-update-channel` has no effect, since Witty has one feed.
 
+### Internal
+
+- **Release assets are named `Witty-<version>-macos-<arch>.dmg`.** When HEAD
+  carries a `witty-v*` tag (or `WITTY_RELEASE_TAG` names one),
+  `macos/scripts/package_release.sh` writes `dist/Witty-v0.1.4-macos-universal.dmg`
+  instead of `dist/Witty.dmg`, with the architecture read from the app binary.
+  The earlier `Ghostty-witty-v0.1.1-macos-arm64.zip` was packaged outside this
+  repository: no script or workflow in its history produces that name.
+
 ### Docs
 
 - Witty is an independent open-source project of Reality Inc., not affiliated

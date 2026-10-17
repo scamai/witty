@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Package a distributable, notarized Witty.dmg from the ReleaseLocal build.
+# Package a distributable, notarized Witty DMG from the ReleaseLocal build.
 # Modeled on halo's scripts/sign_and_notarize.sh.
 #
 # Build first (Developer ID signed, hardened runtime comes from the Xcode
@@ -24,7 +24,11 @@
 #   WITTY_APP            app bundle to package (default: the ReleaseLocal build).
 #                        Point it at a copy to repackage without touching the
 #                        build output a running Witty may be using.
-#   WITTY_DMG            output path (default: dist/Witty.dmg)
+#   WITTY_RELEASE_TAG    release tag such as witty-v0.1.4 (default: the
+#                        witty-v* tag at HEAD, if any). With a tag the DMG is
+#                        named for upload: dist/Witty-v0.1.4-macos-<arch>.dmg.
+#   WITTY_DMG            output path (default: dist/Witty.dmg without a tag,
+#                        else the name above)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -33,15 +37,23 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 . "$SCRIPT_DIR/lib_signing.sh"
 
 APP="${WITTY_APP:-${REPO_ROOT}/macos/build/ReleaseLocal/Witty.app}"
-DMG="${WITTY_DMG:-${REPO_ROOT}/dist/Witty.dmg}"
 
 DEV_ID="$(resolve_sign_identity "${1:-}")"
 PROFILE="${2:-AC_NOTARY}"
 
 [ -d "${APP}" ] || { echo "error: ${APP} not found — run the zig build above first"; exit 1; }
 
+TAG="${WITTY_RELEASE_TAG:-$(git -C "${REPO_ROOT}" describe --exact-match --tags --match 'witty-v*' 2>/dev/null || true)}"
+if [ -n "${TAG}" ]; then
+  DMG_NAME="$(release_dmg_name "${TAG}" "$(lipo -archs "${APP}/Contents/MacOS/ghostty")")"
+else
+  DMG_NAME="Witty.dmg"
+fi
+DMG="${WITTY_DMG:-${REPO_ROOT}/dist/${DMG_NAME}}"
+
 echo "==> Signing identity: ${DEV_ID}"
 echo "==> Notary profile:   ${PROFILE}"
+echo "==> Output:           ${DMG}"
 check_cert_validity "${DEV_ID}"
 
 ENTITLEMENTS="${REPO_ROOT}/macos/GhosttyReleaseLocal.entitlements"

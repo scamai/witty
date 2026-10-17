@@ -64,6 +64,29 @@ $COMPANY" WITTY_SIGN_IDENTITY="$COMPANY" run_lib resolve_sign_identity 2>/dev/nu
 out="$(IDENTITIES="" WITTY_SIGN_IDENTITY="$COMPANY" run_lib resolve_sign_identity "$PERSONAL" 2>/dev/null)"
 [ "$out" = "$PERSONAL" ] && pass "explicit argument wins over env" || fail "argument override: got '$out'"
 
+# ─── release_dmg_name ───
+
+out="$(run_lib release_dmg_name witty-v0.1.4 "x86_64 arm64" 2>/dev/null)"
+[ "$out" = "Witty-v0.1.4-macos-universal.dmg" ] && pass "fat app is named universal" || fail "universal name: got '$out'"
+
+out="$(run_lib release_dmg_name witty-v0.1.4 "arm64" 2>/dev/null)"
+[ "$out" = "Witty-v0.1.4-macos-arm64.dmg" ] && pass "arm64 app is named arm64" || fail "arm64 name: got '$out'"
+
+out="$(run_lib release_dmg_name witty-v0.1.4 "x86_64" 2>/dev/null)"
+[ "$out" = "Witty-v0.1.4-macos-x86_64.dmg" ] && pass "x86_64 app is named x86_64" || fail "x86_64 name: got '$out'"
+
+if run_lib release_dmg_name "" "arm64" >/dev/null 2>&1; then
+  fail "a missing tag must fail"
+else
+  pass "a missing tag fails"
+fi
+
+if run_lib release_dmg_name witty-v0.1.4 "" >/dev/null 2>&1; then
+  fail "unknown architectures must fail"
+else
+  pass "unknown architectures fail"
+fi
+
 # ─── check_cert_validity_pem ───
 
 make_cert() { # name days

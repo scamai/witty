@@ -29,6 +29,9 @@ feature-rich terminal emulator — plus **one** focused addition: the
 upstream regularly. If you don't use the new prefix, witty behaves exactly like
 Ghostty.
 
+Witty is an independent fork of Ghostty, maintained by Reality Inc. It is not
+affiliated with or endorsed by the Ghostty project.
+
 ## Contents
 
 - [What witty adds](#what-witty-adds)
@@ -179,6 +182,13 @@ page, unzip, and drop it into `/Applications`. (The app installs the same
 launch it copies an existing Ghostty config there, so your setup carries
 over.)
 
+**Next to Ghostty** — Witty and Ghostty can be installed side by side. Their
+config directories are separate (`~/.config/witty` and
+`~/Library/Application Support/ai.scam.witty` for Witty, `~/.config/ghostty`
+and `~/Library/Application Support/com.mitchellh.ghostty` for Ghostty), so
+Witty-only settings such as `altscreen:` binds never reach Ghostty, and each
+app has its own bundle identifier.
+
 **Build from source** — requires [Zig](https://ziglang.org) `0.15.2` (see
 `.zig-version` / `minimum_zig_version` in `build.zig.zon`):
 
@@ -222,9 +232,10 @@ reconnect-after-disconnect — is identical.
 
 ## Built on Ghostty
 
-witty is a fork of **[ghostty-org/ghostty](https://github.com/ghostty-org/ghostty)**
-by Mitchell Hashimoto and the Ghostty contributors. All of Ghostty's
-documentation, downloads, and terminal behavior apply unchanged:
+Witty is an independent fork of
+**[ghostty-org/ghostty](https://github.com/ghostty-org/ghostty)** by Mitchell
+Hashimoto and the Ghostty contributors, maintained by Reality Inc. Ghostty's
+documentation and terminal behavior otherwise apply unchanged:
 
 - 🌐 Website & downloads: <https://ghostty.org>
 - 📚 Documentation: <https://ghostty.org/docs>
@@ -291,4 +302,5 @@ upstream README at
 
 ## License
 
-Same as upstream Ghostty — see [LICENSE](LICENSE) (MIT).
+MIT, the same as upstream Ghostty — see [LICENSE](LICENSE). It keeps Ghostty's
+copyright notice and adds Reality Inc.'s for Witty's modifications.

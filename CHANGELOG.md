@@ -42,6 +42,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   makes no network requests, and the menu item and command palette entry are
   hidden. `auto-update-channel` has no effect, since Witty has one feed.
 
+### Docs
+
+- Witty is an independent open-source project of Reality Inc., not affiliated
+  with or endorsed by the Ghostty project. `LICENSE` keeps Ghostty's copyright
+  notice unchanged and adds `Copyright (c) 2026 Reality Inc.` for Witty's
+  modifications; the README says so and explains that Witty and Ghostty can be
+  installed side by side.
+
 ## [witty-v0.1.3] — 2026-09-19
 
 Synced with upstream Ghostty at `b32f20f3e` (2026-09-19) — 793 commits since

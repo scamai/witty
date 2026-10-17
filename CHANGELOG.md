@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [witty-v0.2.0] — 2026-10-17
+
 ### Changed
 
 - **New app icon: a four-leaf clover on warm paper.** Its four leaves sit in the four quadrants,
@@ -253,5 +255,6 @@ d972d63 fix(input): altscreen gate continues the trigger chain instead of aborti
 8103116 feat(input): add altscreen: keybind prefix
 ```
 
+[witty-v0.2.0]: https://github.com/scamai/witty/releases/tag/witty-v0.2.0
 [witty-v0.1.1]: https://github.com/scamai/witty/releases/tag/witty-v0.1.1
 [witty-v0.1.0]: https://github.com/scamai/witty/releases/tag/witty-v0.1.0

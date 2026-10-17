@@ -175,9 +175,10 @@ reconnectable view.
 witty is currently macOS-focused (the shipped default binding is macOS). Linux
 (GTK) builds the same way as upstream Ghostty.
 
-**Prebuilt macOS app** — grab the latest `Witty.app` (Apple Silicon,
-ad-hoc signed) from the [Releases](https://github.com/shenxingy/witty/releases)
-page, unzip, and drop it into `/Applications`. (The app installs the same
+**Prebuilt macOS app** — grab the latest `Witty-<version>-macos-<arch>.dmg`
+from the [Releases](https://github.com/scamai/witty/releases) page, open it and
+drag Witty into `/Applications`. Builds from v0.2 on are signed with Reality Inc.'s
+Developer ID and notarized by Apple; the v0.1.x zips were ad-hoc signed. (The app installs the same
 `ghostty` CLI but reads its own config, `~/.config/witty/config`. On first
 launch it copies an existing Ghostty config there, so your setup carries
 over.)

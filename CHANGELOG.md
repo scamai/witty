@@ -247,5 +247,5 @@ d972d63 fix(input): altscreen gate continues the trigger chain instead of aborti
 8103116 feat(input): add altscreen: keybind prefix
 ```
 
-[witty-v0.1.1]: https://github.com/shenxingy/witty/releases/tag/witty-v0.1.1
-[witty-v0.1.0]: https://github.com/shenxingy/witty/releases/tag/witty-v0.1.0
+[witty-v0.1.1]: https://github.com/scamai/witty/releases/tag/witty-v0.1.1
+[witty-v0.1.0]: https://github.com/scamai/witty/releases/tag/witty-v0.1.0

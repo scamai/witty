@@ -9,6 +9,8 @@
   - Build: `macos/build.nu [--scheme Ghostty] [--configuration Debug] [--action build]`
   - Output: `macos/build/<configuration>/Witty.app` (e.g. `macos/build/Debug/Witty.app`)
 - Run unit tests directly with `macos/build.nu --action test`
+  - `zig build test` runs them only without `-Dtest-filter`: a filtered run
+    reports success without building or running any Swift test.
 
 ## Release (signed + notarized DMG)
 

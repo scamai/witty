@@ -3,7 +3,9 @@ import SwiftUI
 struct AboutView: View {
     @Environment(\.openURL) var openURL
 
-    private let githubURL = URL(string: "https://github.com/ghostty-org/ghostty")
+    // Witty: the repository and release notes are Witty's; the docs stay
+    // Ghostty's, which document everything but the altscreen: prefix.
+    private let githubURL = URL(string: "https://github.com/scamai/witty")
     private let docsURL = URL(string: "https://ghostty.org/docs")
 
     /// Read the commit from the bundle.
@@ -33,8 +35,7 @@ struct AboutView: View {
         var url: URL? {
             switch self {
             case .stable(let version):
-                let slug = version.replacingOccurrences(of: ".", with: "-")
-                return URL(string: "https://ghostty.org/docs/install/release-notes/\(slug)")
+                return URL(string: "https://github.com/scamai/witty/releases/tag/witty-v\(version)")
             default:
                 return nil
             }
@@ -78,10 +79,10 @@ struct AboutView: View {
 
             VStack(alignment: .center, spacing: 32) {
                 VStack(alignment: .center, spacing: 8) {
-                    Text("Ghostty")
+                    Text("Witty")
                         .bold()
                         .font(.title)
-                    Text("Fast, native, feature-rich terminal \nemulator pushing modern features.")
+                    Text("A Ghostty fork with\naltscreen-aware keybindings.")
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                         .font(.caption)

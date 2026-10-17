@@ -48,6 +48,13 @@ under witty-v0.1.3 and witty-v0.1.2, which were never released as builds.
   and the Dock tile plugin. macOS sees this as a new app: privacy grants such
   as Screen Recording and Accessibility have to be given again, and settings
   stored under the old identifier (UserDefaults) do not carry over.
+- **The app calls itself Witty.** The menus (About, Hide and Quit Witty, Witty
+  Help, Make Witty the Default Terminal), alerts, the permission prompts macOS
+  shows for the camera, microphone and the like, the AppleScript dictionary
+  and the About window say Witty instead of Ghostty. A window or tab without a
+  title shows 🍀 instead of 👻. In the About window, GitHub and the version
+  number open Witty's repository and release notes; Docs still opens Ghostty's
+  documentation, which covers everything except `altscreen:`.
 
 ### Fixed
 

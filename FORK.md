@@ -77,7 +77,7 @@ screen, and otherwise falls back to the binding it replaced. See
 
 | File | What and why |
 | --- | --- |
-| `macos/Ghostty.xcodeproj/project.pbxproj` | Product name `Witty`, bundle IDs `ai.scam.witty`, `ai.scam.witty.debug` and `ai.scam.witty-dock-tile`, display names, `PRODUCT_MODULE_NAME = Ghostty` (keeps the tests' `@testable import Ghostty`), `TEST_HOST` pointing at `Witty.app`, and code signing through `$(WITTY_CODE_SIGN_IDENTITY:default=-)`. The executable stays `ghostty`. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` are Witty's release version and build number; upstream keeps placeholders there and stamps its versions in CI. |
+| `macos/Ghostty.xcodeproj/project.pbxproj` | Product name `Witty`, bundle IDs `ai.scam.witty`, `ai.scam.witty.debug` and `ai.scam.witty-dock-tile`, display names, `PRODUCT_MODULE_NAME = Ghostty` (keeps the tests' `@testable import Ghostty`), `TEST_HOST` pointing at `Witty.app`, and code signing through `$(WITTY_CODE_SIGN_IDENTITY:default=-)`. The executable stays `ghostty`. The privacy usage descriptions that macOS shows in permission prompts say "A program running within Witty". `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` are Witty's release version and build number; upstream keeps placeholders there and stamps its versions in CI. |
 | `macos/Ghostty.xcodeproj/xcshareddata/xcschemes/Ghostty.xcscheme` | `BuildableName = Witty.app`. |
 | `macos/Ghostty-Info.plist` | Witty's surface UTType (`ai.scam.wittySurfaceId`) and the updater keys (see [Updater](#updater)). |
 | `macos/Sources/Ghostty/Surface View/SurfaceView+Transferable.swift` | The same UTType in code. |
@@ -85,6 +85,10 @@ screen, and otherwise falls back to the binding it replaced. See
 | `src/build/GhosttyXcodebuild.zig` | The built bundle is `macos/build/<config>/Witty.app`; passes the signing identity and updater settings to `xcodebuild`, which runs with an empty environment. |
 | `src/build/Config.zig` | Build options `-Dmacos-sign-identity`, `-Dmacos-update-feed-url`, `-Dmacos-update-public-ed-key`, with `WITTY_*` environment defaults. |
 | `src/cli/help.zig`, `src/main_ghostty.zig` | CLI help says `open -na Witty.app`. |
+| `macos/Sources/App/MainMenu.xib`, the window `.xib` files in `macos/Sources/Features/Terminal/Window Styles/` and `QuickTerminal/`, `TitlebarTabsVenturaTerminalWindow.swift`, `TitlebarTabsTahoeTerminalWindow.swift`, `BaseTerminalController.swift`, `SurfaceView_AppKit.swift` | The app names itself Witty in its menus (About, Hide, Quit, Help, "Make Witty the Default Terminal") and in the default window title, `🍀 Witty`. A window or tab with no title shows `🍀` where upstream shows `👻`. |
+| `macos/Sources/Features/About/AboutView.swift`, `CyclingIconView.swift` | The About window says Witty. Its GitHub button and version link open `scamai/witty` and the `witty-v<version>` release; Docs still opens ghostty.org. |
+| `macos/Sources/App/AppDelegate.swift`, `main.swift`, `Helpers/UntrustedURLAlert.swift`, `Features/Terminal/ErrorView.swift`, `TerminalView.swift`, `App Intents/GhosttyIntentError.swift`, `IntentPermission.swift`, `AppleScript/AppDelegate+AppleScript.swift`, `Update/UpdatePopoverView.swift`, `Command Palette/TerminalCommandPalette.swift` | Alerts, errors and prompts say Witty. |
+| `macos/Ghostty.sdef` | The AppleScript dictionary's title and descriptions say Witty. Its terms, four-letter codes and Cocoa classes are upstream's, so existing scripts keep working. |
 | `images/Ghostty.icon/`, `images/witty-icon-src/`, `macos/Assets.xcassets/AppIconImage.imageset/`, `macos/Assets.xcassets/Custom Icon/CustomIconGhost.imageset/`, `macos/Assets.xcassets/Alternate Icons/*` | Witty's four-leaf-clover icon, with dark and monochrome appearance specialisations, and eight clover alternates under upstream's `macos-icon` theme names. `images/witty-icon-src/draw_clover.swift` generates all of it. Upstream's CRT frame layers, ghost glyph and ghost alternates are removed. The file keeps the name `Ghostty.icon` only because the Xcode project's app-icon name is `Ghostty`. On an upstream icon change, keep Witty's side. |
 
 ### Witty's own config, state and cache directories
@@ -179,6 +183,10 @@ All Witty-only files.
 - **`macos/Sources/Features/Settings/SettingsView.swift`** still names
   `~/.config/ghostty/config.ghostty`. Nothing shows this view; it is only used
   by its own preview.
+- **User-visible text in the GTK app and the Zig core**, such as the GTK
+  About dialog and the command palette's `Ghostty` entry that types a `👻`
+  (`src/input/command.zig`). These strings go through gettext, where a new
+  msgid drops every translation of it, and Witty ships no Linux packages.
 - **`src/extra/vim.zig`** detects the `ghostty` filetype for `*/ghostty/config`
   but not `*/witty/config`. Files named `config.ghostty` are still detected.
 - **Upstream's release workflows** (`.github/workflows/release-tag.yml`,

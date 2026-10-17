@@ -87,6 +87,50 @@ else
   pass "unknown architectures fail"
 fi
 
+# ─── check_release_version ───
+
+# The prose mention of witty-v0.3.0 must not count as its section.
+cat >"$TMP/CHANGELOG.md" <<'EOF'
+# Changelog
+
+## [Unreleased]
+
+## [witty-v0.2.0] — 2026-10-17
+
+- Notes. The next release will be [witty-v0.3.0].
+EOF
+
+if run_lib check_release_version witty-v0.2.0 0.2.0 "$TMP/CHANGELOG.md" 2>"$TMP/err"; then
+  pass "matching tag, app version and changelog pass"
+else
+  fail "matching release: $(cat "$TMP/err")"
+fi
+
+if run_lib check_release_version witty-v0.2.0 0.1 "$TMP/CHANGELOG.md" 2>"$TMP/err"; then
+  fail "an app version that differs from the tag must fail"
+else
+  grep -q "MARKETING_VERSION = 0.2.0" "$TMP/err" && pass "a version mismatch fails and names the setting" ||
+    fail "version mismatch: wrong message: $(cat "$TMP/err")"
+fi
+
+if run_lib check_release_version witty-v0.3.0 0.3.0 "$TMP/CHANGELOG.md" 2>"$TMP/err"; then
+  fail "a release without a changelog section must fail"
+else
+  grep -q "no '## \[witty-v0.3.0\]' section" "$TMP/err" && pass "a missing changelog section fails" ||
+    fail "missing section: wrong message: $(cat "$TMP/err")"
+fi
+
+# Each malformed tag gets a matching app version and changelog section, so
+# only the tag-format check can reject it.
+for bad in v0.2.0 witty-v0.2 witty-v0.2.0-rc1; do
+  printf '## [%s]\n' "$bad" >"$TMP/CHANGELOG-bad.md"
+  if run_lib check_release_version "$bad" "${bad#witty-v}" "$TMP/CHANGELOG-bad.md" >/dev/null 2>&1; then
+    fail "tag '$bad' must be rejected"
+  else
+    pass "tag '$bad' is rejected"
+  fi
+done
+
 # ─── check_cert_validity_pem ───
 
 make_cert() { # name days

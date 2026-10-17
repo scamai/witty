@@ -26,7 +26,8 @@
 #                        build output a running Witty may be using.
 #   WITTY_RELEASE_TAG    release tag such as witty-v0.1.4 (default: the
 #                        witty-v* tag at HEAD, if any). With a tag the DMG is
-#                        named for upload: dist/Witty-v0.1.4-macos-<arch>.dmg.
+#                        named for upload: dist/Witty-v0.1.4-macos-<arch>.dmg,
+#                        and the app's version and CHANGELOG.md must match it.
 #   WITTY_DMG            output path (default: dist/Witty.dmg without a tag,
 #                        else the name above)
 set -euo pipefail
@@ -45,6 +46,9 @@ PROFILE="${2:-AC_NOTARY}"
 
 TAG="${WITTY_RELEASE_TAG:-$(git -C "${REPO_ROOT}" describe --exact-match --tags --match 'witty-v*' 2>/dev/null || true)}"
 if [ -n "${TAG}" ]; then
+  check_release_version "${TAG}" \
+    "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${APP}/Contents/Info.plist")" \
+    "${REPO_ROOT}/CHANGELOG.md"
   DMG_NAME="$(release_dmg_name "${TAG}" "$(lipo -archs "${APP}/Contents/MacOS/ghostty")")"
 else
   DMG_NAME="Witty.dmg"

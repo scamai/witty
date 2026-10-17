@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [witty-v0.2.0] — 2026-10-17
 
+The first release since witty-v0.1.1, and the first one signed with Reality
+Inc.'s Developer ID and notarized by Apple. It also ships the changes listed
+under witty-v0.1.3 and witty-v0.1.2, which were never released as builds.
+
 ### Changed
 
 - **New app icon: a four-leaf clover on warm paper.** Its four leaves sit in the four quadrants,
@@ -61,6 +65,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   releases must be in vX.Y.Z format matching build.zig" when the commit carries
   any other tag, which included every `witty-v*` tag. `src/build/GitVersion.zig`
   now skips Witty's tags; they version the app, not the Ghostty core.
+- **`package_release.sh` refuses a release whose versions disagree.** For a
+  `witty-vX.Y.Z` tag, the app's version must be `X.Y.Z` (`MARKETING_VERSION`
+  in the Xcode project) and `CHANGELOG.md` must have a `## [witty-vX.Y.Z]`
+  section. The check runs before anything is signed. At the v0.1.0 and v0.1.1
+  tags the Xcode project still carried upstream's placeholder version, 0.1 (1).
 - **Release assets are named `Witty-<version>-macos-<arch>.dmg`.** When HEAD
   carries a `witty-v*` tag (or `WITTY_RELEASE_TAG` names one),
   `macos/scripts/package_release.sh` writes `dist/Witty-v0.1.4-macos-universal.dmg`
@@ -79,6 +88,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   Ghostty and why, with the rules an upstream merge must follow.
 
 ## [witty-v0.1.3] — 2026-09-19
+
+_Never tagged or released as a build; these changes first shipped in
+[witty-v0.2.0]._
 
 Synced with upstream Ghostty at `b32f20f3e` (2026-09-19) — 793 commits since
 the previous fork point (`94d775fef`, 2026-08-10), including the Kitty
@@ -132,6 +144,9 @@ a `scrollback-pull-on-resize` option. See
   while the product is Witty.app.
 
 ## [witty-v0.1.2] — 2026-06-29
+
+_Tagged, but no build was released; these changes first shipped in
+[witty-v0.2.0]._
 
 Synced with upstream Ghostty at `28f9367be` (2026-06-29) — 29 commits since the
 previous fork point, including a GTK dbus-connection crash fix, a macOS

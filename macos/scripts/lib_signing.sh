@@ -63,6 +63,27 @@ check_cert_validity() {
   security find-certificate -c "$1" -p 2>/dev/null | check_cert_validity_pem "$1"
 }
 
+# Fail unless a release tag, the app being packaged and CHANGELOG.md agree:
+# $1 is the tag (witty-vX.Y.Z), $2 the app's CFBundleShortVersionString, $3 the
+# changelog, which needs a "## [witty-vX.Y.Z]" section. A DMG named for one
+# version must not carry another, and every release has notes.
+check_release_version() {
+  local tag="$1" app_version="$2" changelog="$3"
+  local version="${tag#witty-v}"
+  if [ "$version" = "$tag" ] || ! printf '%s\n' "$version" | grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+'; then
+    echo "error: release tag '$tag' is not of the form witty-vX.Y.Z" >&2
+    return 1
+  fi
+  if [ "$app_version" != "$version" ]; then
+    echo "error: the tag is $tag but the app's version is '$app_version'; set MARKETING_VERSION = $version in macos/Ghostty.xcodeproj/project.pbxproj" >&2
+    return 1
+  fi
+  if ! grep -q "^## \[${tag//./\\.}\]" "$changelog"; then
+    echo "error: $changelog has no '## [$tag]' section" >&2
+    return 1
+  fi
+}
+
 # Print the file name to publish the DMG under: Witty-<version>-macos-<arch>.dmg,
 # e.g. Witty-v0.1.4-macos-universal.dmg. $1 is the release tag (a leading
 # "witty-" is dropped), $2 the architectures `lipo -archs` reports for the app.

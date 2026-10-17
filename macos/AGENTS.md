@@ -12,6 +12,25 @@
 
 ## Release (signed + notarized DMG)
 
+- Cutting release `witty-vX.Y.Z`:
+  1. In `macos/Ghostty.xcodeproj/project.pbxproj`, set `MARKETING_VERSION =
+     X.Y.Z` and raise `CURRENT_PROJECT_VERSION` by one, in the six build
+     configurations of the app and the Dock tile plugin (not the test
+     targets). Sparkle compares the build number, so it must always grow.
+  2. In `CHANGELOG.md`, turn `## [Unreleased]` into `## [witty-vX.Y.Z] —
+     <date>`, open a new empty `## [Unreleased]` above it, and add the link
+     reference at the bottom.
+  3. Commit (`chore(release): Witty X.Y.Z (build N)`), then tag that commit:
+     `git tag -a witty-vX.Y.Z -m "Witty X.Y.Z"`.
+  4. Run `macos/scripts/release.sh` at the tag. `package_release.sh` stops
+     before signing if the tag, the app's version and the changelog
+     disagree.
+  5. Push the commit and the tag, then create the GitHub release from the
+     tag with `dist/Witty-vX.Y.Z-macos-<arch>.dmg` and its SHA-256.
+
+  The tag does not change the Ghostty core's version: `GitVersion.zig`
+  skips `witty-v*` tags, so `ghostty +version` still reports
+  `<core version>-<branch>+<commit>`, such as `1.3.2-main+e0e6136`.
 - Full pipeline: `macos/scripts/release.sh`
   - Builds ReleaseFast via zig + xcodebuild, re-signs every Mach-O
     inside-out with Developer ID + secure timestamp, notarizes and staples

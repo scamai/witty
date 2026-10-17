@@ -77,7 +77,7 @@ screen, and otherwise falls back to the binding it replaced. See
 
 | File | What and why |
 | --- | --- |
-| `macos/Ghostty.xcodeproj/project.pbxproj` | Product name `Witty`, bundle IDs `ai.scam.witty`, `ai.scam.witty.debug` and `ai.scam.witty-dock-tile`, display names, `PRODUCT_MODULE_NAME = Ghostty` (keeps the tests' `@testable import Ghostty`), `TEST_HOST` pointing at `Witty.app`, and code signing through `$(WITTY_CODE_SIGN_IDENTITY:default=-)`. The executable stays `ghostty`. |
+| `macos/Ghostty.xcodeproj/project.pbxproj` | Product name `Witty`, bundle IDs `ai.scam.witty`, `ai.scam.witty.debug` and `ai.scam.witty-dock-tile`, display names, `PRODUCT_MODULE_NAME = Ghostty` (keeps the tests' `@testable import Ghostty`), `TEST_HOST` pointing at `Witty.app`, and code signing through `$(WITTY_CODE_SIGN_IDENTITY:default=-)`. The executable stays `ghostty`. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` are Witty's release version and build number; upstream keeps placeholders there and stamps its versions in CI. |
 | `macos/Ghostty.xcodeproj/xcshareddata/xcschemes/Ghostty.xcscheme` | `BuildableName = Witty.app`. |
 | `macos/Ghostty-Info.plist` | Witty's surface UTType (`ai.scam.wittySurfaceId`) and the updater keys (see [Updater](#updater)). |
 | `macos/Sources/Ghostty/Surface View/SurfaceView+Transferable.swift` | The same UTType in code. |
@@ -121,8 +121,8 @@ All Witty-only files.
 | File | What and why |
 | --- | --- |
 | `macos/scripts/release.sh` | ReleaseFast build, Developer ID signing, DMG, notarization, stapling. Warns when the updater settings are missing. |
-| `macos/scripts/package_release.sh` | Re-signs inside-out with a secure timestamp, notarizes and staples app and DMG. A `witty-v*` tag names the DMG `Witty-<version>-macos-<arch>.dmg`. |
-| `macos/scripts/lib_signing.sh`, `macos/scripts/test_lib_signing.sh` | Signing identity resolution, certificate expiry checks, notarization, the release asset name, and their tests. |
+| `macos/scripts/package_release.sh` | Re-signs inside-out with a secure timestamp, notarizes and staples app and DMG. A `witty-v*` tag names the DMG `Witty-<version>-macos-<arch>.dmg`, and is refused unless the app's version and a `CHANGELOG.md` section match it. |
+| `macos/scripts/lib_signing.sh`, `macos/scripts/test_lib_signing.sh` | Signing identity resolution, certificate expiry checks, notarization, the release asset name, the tag/version/changelog check, and their tests. |
 | `src/build/GitVersion.zig` | Skips `witty-v*` tags when it detects the core's version. Upstream's `Config.zig` panics when the built commit carries any tag other than a `vX.Y.Z` matching `build.zig.zon`, so without this a tagged Witty release cannot be built. |
 | `macos/AGENTS.md` | Release prerequisites, pitfalls and settings. |
 | `AGENTS.md` | Points at the release script. |

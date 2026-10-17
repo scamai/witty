@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   top-left leaf. It replaces the violet `W` on upstream's CRT frame. The in-app image and the
   tintable glyph of the custom Dock icon change with it, so no ghost remains in the default
   artwork. `images/witty-icon-src/draw_clover.swift` regenerates every piece.
+- **The clover follows macOS icon appearances.** In Dark, the background turns deep forest
+  green. In the Clear and Tinted appearances, the prompt becomes a cut-out so it stays legible on
+  pale glass.
+- **The eight `macos-icon` alternates are clover variants:** blueprint, chalkboard, glass,
+  holographic, microchip, paper, retro and xray. They keep upstream's theme names, so existing
+  config values still work, and no ghost artwork is left in the macOS app (the Linux icons are still upstream's).
 - **Witty now has its own config, state and cache directories**, so it can be
   installed next to Ghostty without either app reading the other's files. The
   config lives in `~/.config/witty/` (was `~/.config/ghostty/`) and, on macOS,

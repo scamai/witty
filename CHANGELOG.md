@@ -26,6 +26,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   and logged. Ghostty's config itself is untouched, so if it includes
   Witty-only `altscreen:` binds, remove that include from
   `~/.config/ghostty/config` by hand to make stock Ghostty validate again.
+- **The bundle identifier is now `ai.scam.witty`** (was `dev.shenxingy.witty`),
+  with `ai.scam.witty.debug` and `ai.scam.witty-dock-tile` for the debug build
+  and the Dock tile plugin. macOS sees this as a new app: privacy grants such
+  as Screen Recording and Accessibility have to be given again, and settings
+  stored under the old identifier (UserDefaults) do not carry over.
 
 ## [witty-v0.1.3] — 2026-09-19
 

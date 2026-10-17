@@ -112,7 +112,7 @@
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>dev.shenxingy.wittySurfaceId</string>
+			<string>ai.scam.wittySurfaceId</string>
 			<key>UTTypeDescription</key>
 			<string>Witty Surface Identifier</string>
 			<key>UTTypeConformsTo</key>

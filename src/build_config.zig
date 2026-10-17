@@ -74,7 +74,7 @@ pub const user_dir = struct {
 
     /// Under ~/Library/Application Support and ~/Library/Caches on macOS.
     /// It matches the macOS app's bundle identifier.
-    pub const macos = "dev.shenxingy.witty";
+    pub const macos = "ai.scam.witty";
 };
 
 /// True if we should have "slow" runtime safety checks. The initial motivation

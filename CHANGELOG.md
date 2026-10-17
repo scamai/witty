@@ -58,6 +58,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   notice unchanged and adds `Copyright (c) 2026 Reality Inc.` for Witty's
   modifications; the README says so and explains that Witty and Ghostty can be
   installed side by side.
+- [`FORK.md`](FORK.md) lists every file where Witty differs from upstream
+  Ghostty and why, with the rules an upstream merge must follow.
 
 ## [witty-v0.1.3] — 2026-09-19
 

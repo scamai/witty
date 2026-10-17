@@ -234,8 +234,9 @@ reconnect-after-disconnect — is identical.
 
 Witty is an independent fork of
 **[ghostty-org/ghostty](https://github.com/ghostty-org/ghostty)** by Mitchell
-Hashimoto and the Ghostty contributors, maintained by Reality Inc. Ghostty's
-documentation and terminal behavior otherwise apply unchanged:
+Hashimoto and the Ghostty contributors, maintained by Reality Inc. What Witty
+changes, and why, is listed in [FORK.md](FORK.md). Ghostty's documentation and
+terminal behavior otherwise apply unchanged:
 
 - 🌐 Website & downloads: <https://ghostty.org>
 - 📚 Documentation: <https://ghostty.org/docs>

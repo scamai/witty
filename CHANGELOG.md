@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [witty-v0.2.1] — 2026-10-18
+
 Synced with upstream Ghostty at `d2865b8f5` (2026-10-18) — 378 commits since
 the previous fork point (`b32f20f3e`, synced 2026-09-19). For macOS users it
 brings safety fixes: Witty refuses to run a file whose path hides control
@@ -307,6 +309,7 @@ d972d63 fix(input): altscreen gate continues the trigger chain instead of aborti
 8103116 feat(input): add altscreen: keybind prefix
 ```
 
+[witty-v0.2.1]: https://github.com/scamai/witty/releases/tag/witty-v0.2.1
 [witty-v0.2.0]: https://github.com/scamai/witty/releases/tag/witty-v0.2.0
 [witty-v0.1.1]: https://github.com/scamai/witty/releases/tag/witty-v0.1.1
 [witty-v0.1.0]: https://github.com/scamai/witty/releases/tag/witty-v0.1.0

@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   still said Zig 0.15.2 and `Ghostty.app`). The tmux walkthrough moved to
   [`docs/witty-remote-workflow.md`](docs/witty-remote-workflow.md).
 
+### Internal
+
+- **No more Dependabot PRs.** `.github/dependabot.yml` came from upstream and
+  made Dependabot propose bumps to upstream's workflow actions here. Those
+  bumps arrive with each upstream sync instead.
+
 ## [witty-v0.2.0] — 2026-10-17
 
 The first release since witty-v0.1.1, and the first one signed with Reality

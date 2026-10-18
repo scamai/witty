@@ -18,6 +18,7 @@ what Witty needs.
   - [Witty's own config, state and cache directories](#wittys-own-config-state-and-cache-directories)
   - [Updater](#updater)
   - [Release tooling](#release-tooling)
+  - [Repository automation](#repository-automation)
   - [Fixes not upstream](#fixes-not-upstream)
   - [Documentation](#documentation)
 - [Deliberately not changed](#deliberately-not-changed)
@@ -131,6 +132,12 @@ All Witty-only files.
 | `macos/AGENTS.md` | Release prerequisites, pitfalls and settings. |
 | `AGENTS.md` | Points at the release script. |
 | `.gitignore` | Ignores the DMGs in `dist/`. |
+
+### Repository automation
+
+| File | What and why |
+| --- | --- |
+| `.github/dependabot.yml` | Removed. In this repository Dependabot opened PRs that bump the actions in upstream's workflows. Witty takes those bumps with each upstream sync instead, so its copies of the workflows stay identical to upstream's. If a merge brings the file back or conflicts on it, keep it deleted. |
 
 ### Fixes not upstream
 

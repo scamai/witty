@@ -29,9 +29,9 @@ what Witty needs.
 git diff --stat "$(git merge-base HEAD upstream/main)" HEAD
 ```
 
-Every file that command prints should appear below. When this file was
-written it printed 59 files against upstream `b32f20f3e` (2026-09-19, the last
-sync). Witty's hunks inside shared files are marked with `Witty:` or
+Every file that command prints should appear below. After the 2026-10-18
+sync (upstream `d2865b8f5`) it printed 100 files, and each one is listed here
+by its full path or by the directory that holds it. Witty's hunks inside shared files are marked with `Witty:` or
 `witty (fork):` comments.
 
 ## Merge rules
@@ -86,7 +86,7 @@ screen, and otherwise falls back to the binding it replaced. See
 | `src/build/GhosttyXcodebuild.zig` | The built bundle is `macos/build/<config>/Witty.app`; passes the signing identity and updater settings to `xcodebuild`, which runs with an empty environment. |
 | `src/build/Config.zig` | Build options `-Dmacos-sign-identity`, `-Dmacos-update-feed-url`, `-Dmacos-update-public-ed-key`, with `WITTY_*` environment defaults. |
 | `src/cli/help.zig`, `src/main_ghostty.zig` | CLI help says `open -na Witty.app`. |
-| `macos/Sources/App/MainMenu.xib`, the window `.xib` files in `macos/Sources/Features/Terminal/Window Styles/` and `QuickTerminal/`, `TitlebarTabsVenturaTerminalWindow.swift`, `TitlebarTabsTahoeTerminalWindow.swift`, `BaseTerminalController.swift`, `SurfaceView_AppKit.swift` | The app names itself Witty in its menus (About, Hide, Quit, Help, "Make Witty the Default Terminal") and in the default window title, `🍀 Witty`. A window or tab with no title shows `🍀` where upstream shows `👻`. |
+| `macos/Sources/App/MainMenu.xib`, the window `.xib` files in `macos/Sources/Features/Terminal/Window Styles/`, `macos/Sources/Features/QuickTerminal/QuickTerminal.xib`, `TitlebarTabsVenturaTerminalWindow.swift`, `TitlebarTabsTahoeTerminalWindow.swift`, `BaseTerminalController.swift`, `SurfaceView_AppKit.swift` | The app names itself Witty in its menus (About, Hide, Quit, Help, "Make Witty the Default Terminal") and in the default window title, `🍀 Witty`. A window or tab with no title shows `🍀` where upstream shows `👻`. |
 | `macos/Sources/Features/About/AboutView.swift`, `CyclingIconView.swift` | The About window says Witty. Its GitHub button and version link open `scamai/witty` and the `witty-v<version>` release; Docs still opens ghostty.org. |
 | `macos/Sources/App/AppDelegate.swift`, `main.swift`, `Helpers/UntrustedURLAlert.swift`, `Features/Terminal/ErrorView.swift`, `TerminalView.swift`, `App Intents/GhosttyIntentError.swift`, `IntentPermission.swift`, `AppleScript/AppDelegate+AppleScript.swift`, `Update/UpdatePopoverView.swift`, `Command Palette/TerminalCommandPalette.swift` | Alerts, errors and prompts say Witty. |
 | `macos/Ghostty.sdef` | The AppleScript dictionary's title and descriptions say Witty. Its terms, four-letter codes and Cocoa classes are upstream's, so existing scripts keep working. |
@@ -137,7 +137,7 @@ All Witty-only files.
 
 | File | What and why |
 | --- | --- |
-| `.github/dependabot.yml` | Removed. In this repository Dependabot opened PRs that bump the actions in upstream's workflows. Witty takes those bumps with each upstream sync instead, so its copies of the workflows stay identical to upstream's. If a merge brings the file back or conflicts on it, keep it deleted. |
+| `.github/dependabot.yml` | Removed. In this repository Dependabot opened PRs that bump the actions in upstream's workflows. Witty takes those bumps with each upstream sync instead, so its copies of the workflows stay identical to upstream's. If a merge brings the file back or conflicts on it, keep it deleted. Dependabot's security alerts and security-update PRs do not need this file and stay on in the repository settings. |
 
 ### Fixes not upstream
 

@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+Synced with upstream Ghostty at `d2865b8f5` (2026-10-18) — 378 commits since
+the previous fork point (`b32f20f3e`, synced 2026-09-19). For macOS users it
+brings safety fixes: Witty refuses to run a file whose path hides control
+characters, treats links from unknown sources as untrusted, and applies paste
+protection to dragged text and to carriage returns. It fixes two crashes (a
+use-after-free when scrollback prunes the cursor's page, and shrinking the
+columns through a wide character), adds "Close Split" to the right-click
+menu, honors `window-save-state = never`, and keeps the pty and terminal sizes
+in step on resize. tmux control mode keeps its parser state across output notifications.
+Terminal emulation gains DECSTR, DECRQCRA and XTCHECKSUM, `CSI 19 t` and
+DECXCPR. See [ghostty-org/ghostty](https://github.com/ghostty-org/ghostty) for
+the rest. The new file-path alert says Witty, like the app's other text.
+
 ### Docs
 
 - **The README starts with installing**, including how to retire a v0.1.x

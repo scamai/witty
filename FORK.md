@@ -205,3 +205,10 @@ All Witty-only files.
   do not run for Witty: `release-tag.yml` fires on `v1.2.3`-style tags, not
   `witty-v*`; `release-tip.yml` runs only in `ghostty-org`; `publish-tag.yml`
   is manual.
+- **Upstream's community workflows** (`vouch-*.yml`, `milestone.yml`). The
+  files stay as upstream has them, but the workflows are disabled in this
+  repository's Actions settings (2026-10-18): they run on Ghostty's own runners
+  with Ghostty's app secrets, so here every issue, comment or PR left a run
+  queued that never started. `test.yml` has been disabled the same way since
+  2026-06-19; its jobs only run in `ghostty-org` anyway. Re-enable one with
+  `gh workflow enable <file> -R scamai/witty`.

@@ -30,8 +30,10 @@ git diff --stat "$(git merge-base HEAD upstream/main)" HEAD
 ```
 
 Every file that command prints should appear below. After the 2026-10-18
-sync (upstream `d2865b8f5`) it printed 100 files, and each one is listed here
-by its full path or by the directory that holds it. Witty's hunks inside shared files are marked with `Witty:` or
+sync (upstream `d2865b8f5`) it printed 100 files, and 103 once the landing-page
+README added `docs/witty-install.md` and the two files in `images/witty/`
+(2026-10-24). Each one is listed here by its full path or by the directory
+that holds it. Witty's hunks inside shared files are marked with `Witty:` or
 `witty (fork):` comments.
 
 ## Merge rules
@@ -69,7 +71,7 @@ screen, and otherwise falls back to the binding it replaced. See
 | `src/terminal/modes.zig` | Private mode `?8771` (`tmux_active`), which tmux sets from its shell prompt to say it is attached. |
 | `src/terminal/Terminal.zig` | Clears `tmux_active` on every alternate-screen transition so a stale or spoofed value cannot reach a non-tmux app; tests. |
 | `src/terminal/snapshot/terminal.zig` | Snapshots store only upstream's stable mode bits (`SnapshotModeBits = u43`), so the transient `tmux_active` is never saved or restored and the format stays upstream's. This relies on `tmux_active` being the last entry in `modes.zig`: when upstream adds a mode, keep `tmux_active` last and raise `SnapshotModeBits` to upstream's count. The `TERMINAL mode bit layout` test fails until both are done. |
-| `src/config/Config.zig` | Documents `altscreen:` under `keybind`; adds the macOS defaults `cmd+ctrl+=` (tmux `C-b E` on the alternate screen) and `cmd+left` (Home instead of `C-a`). |
+| `src/config/Config.zig` | Documents `altscreen:` under `keybind`; adds the macOS defaults `cmd+ctrl+=` (tmux `C-b E` inside tmux) and `cmd+left` (Home instead of `C-a` inside tmux). |
 | `include/ghostty.h` | `GHOSTTY_BINDING_FLAGS_ALTSCREEN` for the macOS app. |
 | `macos/Sources/Ghostty/Ghostty.Input.swift` | Swift mirror of that flag. |
 | `macos/Sources/Ghostty/Surface View/SurfaceView_AppKit.swift` | Gated bindings are not sent to menu key equivalents, which would bypass the gate. |
@@ -152,11 +154,13 @@ All Witty-only files.
 
 | File | What and why |
 | --- | --- |
-| `README.md` | Witty's README; Ghostty's original is kept in a collapsed section. |
+| `README.md` | Witty's README, a landing page for the macOS app. It links to Ghostty's README upstream instead of keeping a copy. |
 | `FORK.md` | This file. |
 | `CHANGELOG.md` | Witty's changes on top of upstream. |
 | `docs/witty-altscreen.md` | The `altscreen:` prefix and the tmux setup it needs. |
-| `docs/witty-remote-workflow.md` | The persistent remote-dev setup with tmux, moved out of the README. |
+| `docs/witty-remote-workflow.md` | The persistent remote-dev setup with tmux, moved out of the README, plus the note for Windows users. |
+| `docs/witty-install.md` | Download, first launch and the Ghostty config import, living next to Ghostty, updates, the `ghostty` CLI, upgrading from v0.1.x, platform support and building from source, moved out of the README. |
+| `images/witty/` | The README's hero illustration (`one-key-two-jobs.svg`, a diagram, not a screenshot) and its Download button (`download-macos.svg`). |
 | `LICENSE` | Ghostty's MIT notice unchanged, plus `Copyright (c) 2026 Reality Inc.` for Witty's modifications. |
 
 ## Deliberately not changed

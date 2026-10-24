@@ -8,6 +8,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Docs
+
+- **The README is a landing page for the Mac app.** It opens with a download
+  button and an illustration of one key doing two jobs, and its quick start
+  includes the tmux config and shell lines the `altscreen:` keys need:
+  until they are in place, Witty's keys behave exactly like Ghostty's. The old
+  opening said a key switched for any fullscreen program (tmux, Neovim, less);
+  since witty-v0.1.2 it switches only inside tmux. Install details, upgrading
+  from v0.1.x, platform support and the build steps moved to
+  [`docs/witty-install.md`](docs/witty-install.md), the note for Windows users
+  to [`docs/witty-remote-workflow.md`](docs/witty-remote-workflow.md#on-windows),
+  and the copy of Ghostty's README is replaced by a link to upstream's.
+- **Keybind examples no longer carry trailing comments.** A `#` after a
+  keybind's value is part of the value, so a copied line such as
+  `keybind = altscreen:super+ctrl+equal=text:\x01E   # C-a E …` would have sent
+  the comment along with `C-a E`. In `docs/witty-altscreen.md` and
+  `docs/witty-remote-workflow.md` the comments now sit on their own lines. The
+  altscreen guide also counts both shipped defaults, says what `cmd+left`'s Home
+  needs from zsh, and no longer claims the prefix is tested on Linux. The
+  remote workflow no longer lists `cmd+ctrl+=` as the key that evens out
+  Witty's splits: once each split runs tmux, it evens out that split's tmux
+  panes, and the menu or command palette evens out the splits.
+- **The SSH instructions cover the missing-terminfo error.** Witty keeps
+  `TERM=xterm-ghostty`, so on a server without that terminfo entry tmux stops
+  with `missing or unsuitable terminal: xterm-ghostty`. The README, the remote
+  workflow and the install guide now give the one-time
+  `infocmp -x xterm-ghostty | ssh myserver -- tic -x -` fix. The remote
+  workflow no longer calls its Shift+Option+arrow tmux keys Ghostty's (Witty
+  focuses splits with cmd+option+arrow), and points to the README's quick
+  start for the tmux hook instead of keeping a third copy.
+- **Corrections in the guides.** The altscreen guide describes the switch as
+  inside or outside tmux rather than alternate or primary screen, replaces a
+  `ctrl+r` example that cost the shell its reverse history search with
+  `cmd+t`, and fixes its note on the `cmd+ctrl+=` trigger forms. The install
+  guide says the `ghostty` tool is on `PATH` inside Witty, and that the build
+  needs Zig 0.16.x, not "0.16.0 or later".
+- **The tmux setup covers more setups.** tmux 3.2 and older need no
+  `allow-passthrough` line (they always pass the signal through, and the
+  option arrived in 3.3). bash users need a login profile that sources
+  `~/.bashrc`, because tmux starts login shells. The `cmd+ctrl+=` override
+  applies to any prefix other than `C-b`, not only `C-a`. The v0.1.x upgrade
+  steps note that a Ghostty built from source also reports version 0.1.
+
 ## [witty-v0.2.1] — 2026-10-18
 
 Synced with upstream Ghostty at `d2865b8f5` (2026-10-18) — 378 commits since

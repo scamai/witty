@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="424" viewBox="0 0 760 424" role="img" aria-labelledby="t d">
+  <title id="t">One key, two jobs</title>
+  <desc id="d">Illustration, not a screenshot. Pressing cmd+ctrl+= at your shell evens out Witty's own split panes. Pressing the same key inside tmux evens out tmux's panes instead, locally or over SSH, once tmux has been set up to announce itself.</desc>
+  <defs>
+    <clipPath id="winL"><rect x="30" y="146" width="330" height="180" rx="10"/></clipPath>
+    <clipPath id="winR"><rect x="400" y="146" width="330" height="180" rx="10"/></clipPath>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3E9A62"/>
+    </marker>
+    <style>
+      .ui   { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .cap  { font-size: 26px; fill: #2B2A26; text-anchor: middle; }
+      .head { font-size: 22px; font-weight: 600; fill: #2B2A26; text-anchor: middle; }
+      .say  { font-size: 20px; fill: #2B2A26; text-anchor: middle; }
+      .sub  { font-size: 20px; fill: #6E6450; text-anchor: middle; }
+      .tag  { font-size: 20px; fill: #6E6450; }
+      .frac { font-size: 16px; fill: #6E6450; text-anchor: middle; }
+      .ttl  { font-size: 15px; fill: #9FB3A8; text-anchor: middle; }
+      .ps   { font-size: 14px; fill: #57BF7A; }
+      .line { fill: #4A5A51; }
+    </style>
+  </defs>
+
+  <!-- card: opaque, so it reads on light and dark page backgrounds -->
+  <rect x="0.5" y="0.5" width="759" height="423" rx="18" fill="#F4EDDF" stroke="#E2D7C2"/>
+  <text class="ui tag" x="24" y="38">Illustration</text>
+
+  <!-- the one key: cmd ctrl = -->
+  <g class="ui">
+    <rect x="287" y="21" width="54" height="54" rx="10" fill="#DDD2BC"/>
+    <rect x="287" y="18" width="54" height="54" rx="10" fill="#FFFDF8" stroke="#CFC3AC"/>
+    <text class="cap" x="314" y="54">⌘</text>
+    <rect x="353" y="21" width="54" height="54" rx="10" fill="#DDD2BC"/>
+    <rect x="353" y="18" width="54" height="54" rx="10" fill="#FFFDF8" stroke="#CFC3AC"/>
+    <text class="cap" x="380" y="56">⌃</text>
+    <rect x="419" y="21" width="54" height="54" rx="10" fill="#DDD2BC"/>
+    <rect x="419" y="18" width="54" height="54" rx="10" fill="#FFFDF8" stroke="#CFC3AC"/>
+    <text class="cap" x="446" y="54">=</text>
+  </g>
+
+  <!-- branches: a bracket under the whole chord, so both outcomes come from the same key press -->
+  <path d="M 291 80 V 86 H 469 V 80" fill="none" stroke="#3E9A62" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 380 86 C 380 102, 195 94, 195 110" fill="none" stroke="#3E9A62" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M 380 86 C 380 102, 565 94, 565 110" fill="none" stroke="#3E9A62" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text class="ui head" x="195" y="136">At your shell</text>
+  <text class="ui head" x="565" y="136">Inside tmux</text>
+
+  <!-- LEFT: a Witty window with two native splits, evened out -->
+  <g clip-path="url(#winL)">
+    <rect x="30" y="146" width="330" height="180" fill="#1C2420"/>
+    <rect x="30" y="146" width="330" height="26" fill="#27322C"/>
+    <circle cx="46" cy="159" r="5" fill="#E5675E"/>
+    <circle cx="61" cy="159" r="5" fill="#E7B24C"/>
+    <circle cx="76" cy="159" r="5" fill="#5DBB63"/>
+    <text class="ui ttl" x="195" y="164">Witty</text>
+    <!-- native split divider, centred -->
+    <rect x="194" y="172" width="2" height="154" fill="#3E4D45"/>
+    <!-- left pane -->
+    <text class="mono ps" x="44" y="196">❯</text>
+    <rect class="line" x="60" y="186" width="100" height="10" rx="2"/>
+    <rect class="line" x="44" y="206" width="130" height="10" rx="2" opacity="0.6"/>
+    <rect class="line" x="44" y="222" width="110" height="10" rx="2" opacity="0.6"/>
+    <rect class="line" x="44" y="238" width="136" height="10" rx="2" opacity="0.6"/>
+    <text class="mono ps" x="44" y="268">❯</text>
+    <rect x="60" y="257" width="8" height="14" fill="#C9D6CE"/>
+    <!-- right pane -->
+    <text class="mono ps" x="210" y="196">❯</text>
+    <rect class="line" x="226" y="186" width="84" height="10" rx="2"/>
+    <rect class="line" x="210" y="206" width="136" height="10" rx="2" opacity="0.6"/>
+    <rect class="line" x="210" y="222" width="96" height="10" rx="2" opacity="0.6"/>
+    <text class="mono ps" x="210" y="252">❯</text>
+    <rect x="226" y="241" width="8" height="14" fill="#C9D6CE"/>
+  </g>
+  <!-- equal-width marks -->
+  <g stroke="#B7AA90" stroke-width="1.5">
+    <line x1="31" y1="344" x2="193" y2="344"/><line x1="31" y1="338" x2="31" y2="350"/><line x1="193" y1="338" x2="193" y2="350"/>
+    <line x1="197" y1="344" x2="359" y2="344"/><line x1="197" y1="338" x2="197" y2="350"/><line x1="359" y1="338" x2="359" y2="350"/>
+  </g>
+  <rect x="96" y="334" width="32" height="20" fill="#F4EDDF"/><text class="ui frac" x="112" y="350">½</text>
+  <rect x="262" y="334" width="32" height="20" fill="#F4EDDF"/><text class="ui frac" x="278" y="350">½</text>
+  <text class="ui say" x="195" y="384">Evens out Witty's own splits</text>
+
+  <!-- RIGHT: one Witty window running tmux, three tmux panes evened out -->
+  <g clip-path="url(#winR)">
+    <rect x="400" y="146" width="330" height="180" fill="#1C2420"/>
+    <rect x="400" y="146" width="330" height="26" fill="#27322C"/>
+    <circle cx="416" cy="159" r="5" fill="#E5675E"/>
+    <circle cx="431" cy="159" r="5" fill="#E7B24C"/>
+    <circle cx="446" cy="159" r="5" fill="#5DBB63"/>
+    <text class="ui ttl" x="575" y="164">Witty — ssh myserver — tmux</text>
+    <!-- tmux pane borders -->
+    <rect x="509" y="172" width="2" height="132" fill="#57BF7A"/>
+    <rect x="619" y="172" width="2" height="132" fill="#3E4D45"/>
+    <!-- pane 1 -->
+    <text class="mono ps" x="412" y="196">❯</text>
+    <rect class="line" x="428" y="186" width="66" height="10" rx="2"/>
+    <rect class="line" x="412" y="206" width="86" height="10" rx="2" opacity="0.6"/>
+    <rect class="line" x="412" y="222" width="62" height="10" rx="2" opacity="0.6"/>
+    <text class="mono ps" x="412" y="252">❯</text>
+    <rect x="428" y="241" width="8" height="14" fill="#C9D6CE"/>
+    <!-- pane 2 -->
+    <text class="mono ps" x="523" y="196">❯</text>
+    <rect class="line" x="539" y="186" width="64" height="10" rx="2"/>
+    <rect class="line" x="523" y="206" width="86" height="10" rx="2" opacity="0.6"/>
+    <rect class="line" x="523" y="222" width="72" height="10" rx="2" opacity="0.6"/>
+    <rect class="line" x="523" y="238" width="56" height="10" rx="2" opacity="0.6"/>
+    <!-- pane 3 -->
+    <text class="mono ps" x="633" y="196">❯</text>
+    <rect class="line" x="649" y="186" width="60" height="10" rx="2"/>
+    <rect class="line" x="633" y="206" width="84" height="10" rx="2" opacity="0.6"/>
+    <rect class="line" x="633" y="222" width="70" height="10" rx="2" opacity="0.6"/>
+    <!-- tmux status bar -->
+    <rect x="400" y="304" width="330" height="22" fill="#57BF7A"/>
+    <text class="mono" x="410" y="320" font-size="15" fill="#14201A">[main] 0:zsh*</text>
+  </g>
+  <!-- equal-width marks -->
+  <g stroke="#B7AA90" stroke-width="1.5">
+    <line x1="401" y1="344" x2="508" y2="344"/><line x1="401" y1="338" x2="401" y2="350"/><line x1="508" y1="338" x2="508" y2="350"/>
+    <line x1="512" y1="344" x2="618" y2="344"/><line x1="512" y1="338" x2="512" y2="350"/><line x1="618" y1="338" x2="618" y2="350"/>
+    <line x1="622" y1="344" x2="729" y2="344"/><line x1="622" y1="338" x2="622" y2="350"/><line x1="729" y1="338" x2="729" y2="350"/>
+  </g>
+  <rect x="438" y="334" width="32" height="20" fill="#F4EDDF"/><text class="ui frac" x="454" y="350">⅓</text>
+  <rect x="549" y="334" width="32" height="20" fill="#F4EDDF"/><text class="ui frac" x="565" y="350">⅓</text>
+  <rect x="660" y="334" width="32" height="20" fill="#F4EDDF"/><text class="ui frac" x="676" y="350">⅓</text>
+  <text class="ui say" x="565" y="384">Evens out tmux's panes</text>
+  <text class="ui sub" x="565" y="410">over SSH too, after the tmux setup</text>
+</svg>

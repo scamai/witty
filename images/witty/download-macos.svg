@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="52" viewBox="0 0 260 52" role="img" aria-labelledby="t">
+  <title id="t">Download for macOS</title>
+  <rect x="0.5" y="0.5" width="259" height="51" rx="12" fill="#2F6B3F" stroke="#24552F"/>
+  <!-- download glyph: an arrow into a tray -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M31 14 V30"/>
+    <path d="M24 23.5 L31 30.5 L38 23.5"/>
+    <path d="M21 33 V37 H41 V33"/>
+  </g>
+  <text x="148" y="32.5" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="600"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Download for macOS</text>
+</svg>

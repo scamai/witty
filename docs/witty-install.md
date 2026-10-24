@@ -162,10 +162,11 @@ zig build test -Dtest-filter="<name>"   # prefer a filter; the full suite is slo
 `macos/scripts/release.sh` makes the signed, notarized DMG; its prerequisites
 are in [`macos/AGENTS.md`](../macos/AGENTS.md).
 [`HACKING.md`](../HACKING.md) covers building, testing and debugging.
-Upstream's [`CONTRIBUTING.md`](../CONTRIBUTING.md) describes Ghostty's own
-process (vouching, Discussions), which does not apply here: open issues and
-pull requests in this repository. Before changing a file that upstream also
-changes, read the [merge rules](../FORK.md#merge-rules) in FORK.md.
+[`.github/CONTRIBUTING.md`](../.github/CONTRIBUTING.md) explains how to
+contribute to Witty. The `CONTRIBUTING.md` at the repository root is Ghostty's,
+and its process (vouching, Discussions) does not apply here. Before changing a
+file that upstream also changes, read the [merge rules](../FORK.md#merge-rules)
+in FORK.md.
 
 Upstream's `test.yml` workflow is disabled in this repository (its jobs only
 run in `ghostty-org`), so run the tests locally before opening a pull request.

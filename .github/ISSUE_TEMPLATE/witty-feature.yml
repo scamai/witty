@@ -1,0 +1,53 @@
+# Witty's own form. The witty- prefix keeps it from colliding with any
+# issue template upstream Ghostty might add again (FORK.md, "Community files").
+name: Feature request
+description: Suggest a change to Witty's altscreen keys, tmux integration, packaging or docs.
+labels: ["enhancement", "triage"]
+type: Feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Witty adds one feature to Ghostty, the `altscreen:` keybind prefix, plus its own app identity. Everything else is Ghostty, merged from upstream regularly, and [FORK.md](https://github.com/scamai/witty/blob/main/FORK.md) lists every difference.
+
+        Ideas for terminal features in general (rendering, fonts, splits, config options and so on) belong with Ghostty, where every Ghostty user benefits: please post them in Ghostty's [Feature Requests, Ideas](https://github.com/ghostty-org/ghostty/discussions/categories/feature-requests-ideas) discussions. Use this form for ideas about Witty's own parts.
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Where does this belong?
+      options:
+        - "Witty: altscreen keys, tmux integration, defaults or docs"
+        - "Witty: install, packaging, updates or app identity"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The situation, and the keys or workflow involved. A concrete example helps most.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like Witty to do?
+      description: |
+        For a keybinding, write it as it would appear in your config, for example `keybind = altscreen:cmd+t=text:\x02c` (inside tmux, cmd+t sends C-b c for a new tmux window; elsewhere it keeps opening a Witty tab).
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: What do you do today instead?
+      description: A workaround, another tool, or nothing yet.
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you like to work on it?
+      description: |
+        Welcome either way. If yes, [CONTRIBUTING](https://github.com/scamai/witty/blob/main/.github/CONTRIBUTING.md) covers building Witty and the fork's PR checklist.
+      options:
+        - "Yes, I'd like to send a PR"
+        - "Maybe, with some guidance"
+        - "No"

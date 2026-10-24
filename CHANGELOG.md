@@ -50,6 +50,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   `~/.bashrc`, because tmux starts login shells. The `cmd+ctrl+=` override
   applies to any prefix other than `C-b`, not only `C-a`. The v0.1.x upgrade
   steps note that a Ghostty built from source also reports version 0.1.
+- **Witty has its own contributing guide, pull request template and code
+  owners**, in `.github/`. GitHub shows them instead of the Ghostty files
+  at the repository root (`CONTRIBUTING.md`, `CODEOWNERS`), which stay
+  unchanged for clean merges. The guide says which documents apply to
+  Witty, what belongs upstream, how to build and run Witty's tests, and
+  Witty's rule for AI-assisted contributions. Pull requests open with the
+  fork checklist and the AI disclosure.
+- **Witty has its own security policy, support page and code of conduct**, in
+  `.github/`. Report vulnerabilities privately through GitHub's private
+  vulnerability reporting or to contact@scam.ai (`[SECURITY][Witty]`).
+  Vulnerabilities that also affect stock Ghostty go to Ghostty's private
+  reporting. Only the latest release gets fixes.
+- **New issues start from Witty's own forms.** Issues open a bug or feature
+  form (blank issues are off), next to links for questions, for bugs that also
+  happen in stock Ghostty (Ghostty's Issue Triage discussions), for Ghostty's
+  docs and for security reports.
 
 ## [witty-v0.2.1] — 2026-10-18
 

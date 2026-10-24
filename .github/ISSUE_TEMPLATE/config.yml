@@ -1,0 +1,21 @@
+# Witty's issue chooser. Witty's own file: upstream Ghostty deleted its
+# config.yml in 4a516fa39 (2026-08-12). If an upstream merge re-adds one,
+# keep this version (FORK.md, "Community files").
+# Only this file and the witty-*.yml forms belong in this directory. A
+# template upstream adds under any other name merges without a conflict and
+# shows up in Witty's issue chooser, so after each upstream sync
+# `git ls-files .github/ISSUE_TEMPLATE` must list nothing else: `git rm` the rest.
+blank_issues_enabled: false
+contact_links:
+  - name: Question or tmux setup help
+    url: https://github.com/scamai/witty/discussions/categories/q-a
+    about: How-do-I questions, the tmux.conf lines and shell hook, and "is this expected?" go to Q&A.
+  - name: Bug that also happens in stock Ghostty
+    url: https://github.com/ghostty-org/ghostty/discussions/new?category=issue-triage
+    about: If it also happens in Ghostty itself, it most likely belongs to Ghostty. Report it there as an Issue Triage discussion (Ghostty takes bug reports as discussions, not issues), with steps that use Ghostty only. You can file it here too.
+  - name: Ghostty features and configuration
+    url: https://ghostty.org/docs
+    about: Config options, themes, fonts and Ghostty's other features work as Ghostty's docs describe. Witty adds the altscreen keybind prefix and reads its config from its own folder (press cmd+comma in Witty to open it).
+  - name: Report a security vulnerability
+    url: https://github.com/scamai/witty/security/policy
+    about: Please report it privately, as the security policy describes. Do not open a public issue.

@@ -264,11 +264,17 @@ WSL. [Platform support](docs/witty-install.md#platform-support) has the details.
 
 ## Contributing
 
-Please report Witty bugs in [this repository's issues](https://github.com/scamai/witty/issues),
-not to the Ghostty project. [Build from source](docs/witty-install.md#build-from-source) explains
-how to build Witty and make a release, and [HACKING.md](HACKING.md) covers building, testing and
-debugging. Upstream's [CONTRIBUTING.md](CONTRIBUTING.md) describes Ghostty's own process (vouching,
-Discussions), which does not apply here: open issues and pull requests in this repository.
+- **Questions and tmux setup help:** ask in
+  [Q&A](https://github.com/scamai/witty/discussions/categories/q-a).
+- **Bugs and ideas:** [open an issue](https://github.com/scamai/witty/issues/new/choose) here,
+  not in Ghostty's tracker. The bug form asks whether stock Ghostty does the same.
+- **Security problems:** report them privately, as the [security policy](.github/SECURITY.md)
+  describes.
+- **Code and docs:** [CONTRIBUTING](.github/CONTRIBUTING.md) explains how to build Witty, run its
+  tests and send a pull request; no vouch is needed. The `CONTRIBUTING.md` at the repository root
+  is Ghostty's, kept unchanged for clean merges, and its process does not apply here.
+
+Everyone taking part is expected to follow the [code of conduct](.github/CODE_OF_CONDUCT.md).
 
 ## Built on Ghostty
 

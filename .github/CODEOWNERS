@@ -1,0 +1,4 @@
+# Witty's code owners.
+# GitHub reads .github/CODEOWNERS before the root CODEOWNERS file. The root
+# file is upstream Ghostty's, kept byte-identical for clean merges (FORK.md).
+* @shenxingy

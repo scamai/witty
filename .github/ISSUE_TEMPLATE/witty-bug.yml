@@ -1,0 +1,103 @@
+# Witty's own form. The witty- prefix keeps it from colliding with any
+# issue template upstream Ghostty might add again (FORK.md, "Community files").
+name: Bug report
+description: Something in Witty is broken, or behaves differently from Witty's docs.
+labels: ["bug", "triage"]
+type: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Witty is Ghostty plus the `altscreen:` keybind prefix and its own app identity (name, icon, bundle ID and config folders), so the first question is whether a problem is Witty's or Ghostty's. [Stock Ghostty](https://ghostty.org/download) installs next to Witty, so you can check. If you haven't tried it, say so below; that's fine.
+
+        Short reports are welcome; we'll ask if we need more. Please [search the existing issues](https://github.com/scamai/witty/issues?q=is%3Aissue) first. For a security problem, don't use this form: follow the [security policy](https://github.com/scamai/witty/security/policy).
+  - type: dropdown
+    id: ghostty-repro
+    attributes:
+      label: Does this also happen in stock Ghostty?
+      description: |
+        If it does, it most likely belongs to Ghostty: please report it there as an [Issue Triage discussion](https://github.com/ghostty-org/ghostty/discussions/new?category=issue-triage), with steps that use Ghostty only, so every Ghostty user gets the fix and Witty picks it up at its next upstream sync. You can file it here too, and we'll label it `upstream`: Witty sometimes carries a fix before Ghostty does ([FORK.md, "Fixes not upstream"](https://github.com/scamai/witty/blob/main/FORK.md#fixes-not-upstream)). Stock Ghostty has no `altscreen:` prefix, so for an `altscreen:` key or the tmux signal, choose "No, only in Witty".
+      options:
+        - "No, only in Witty"
+        - "I haven't tried stock Ghostty"
+        - "Yes, it also happens in stock Ghostty"
+    validations:
+      required: true
+  - type: input
+    id: witty-version
+    attributes:
+      label: Witty version
+      description: In Witty, choose Witty → About Witty and copy the Version and Build rows.
+      placeholder: "Version 0.2.1, Build 3"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac
+      description: From Apple menu → About This Mac.
+      placeholder: "macOS 15.6, MacBook Air (M2)"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: What is it about?
+      options:
+        - "An altscreen: key, or the tmux signal (?8771)"
+        - "Installing, first launch, or the Ghostty config import"
+        - "Witty's name, icon, menus or About window"
+        - "Something else"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+      description: |
+        The steps, what you expected, and what happened instead. Screenshots or a short screen recording help; drag them in.
+      placeholder: |
+        1. ssh myhost -t 'tmux new -A -s main'
+        2. Split the tmux window twice: C-b %, then C-b % again (the panes are now 1/2, 1/4 and 1/4)
+        3. Press cmd+ctrl+=
+        Expected: the three panes become the same width.
+        Actual: nothing happens.
+    validations:
+      required: true
+  - type: textarea
+    id: tmux-setup
+    attributes:
+      label: tmux setup (for altscreen and tmux problems)
+      description: |
+        On the host where tmux runs, paste the output of `tmux -V`, `tmux show -g allow-passthrough`, `tmux show -g prefix` and `tmux show-hooks -g | grep client-attached`. tmux 3.2 and older have no `allow-passthrough` option, so that one fails there; that's expected. Then say which shell hook from [the setup guide](https://github.com/scamai/witty/blob/main/docs/witty-altscreen.md#setting-the-signal-from-your-shell) you installed (zsh, bash, your own, or none), and whether tmux runs on this Mac or over SSH.
+      placeholder: |
+        $ tmux -V
+        tmux 3.4
+        $ tmux show -g allow-passthrough
+        allow-passthrough on
+        $ tmux show -g prefix
+        prefix C-b
+        $ tmux show-hooks -g | grep client-attached
+        client-attached[0] run-shell -b "printf \"\\033[?8771h\" > #{client_tty}"
+        Shell hook: zsh. tmux runs on a Linux server, over SSH.
+      render: text
+  - type: textarea
+    id: config
+    attributes:
+      label: Your Witty config
+      description: |
+        Run `/Applications/Witty.app/Contents/MacOS/ghostty +show-config` in a terminal (adjust the path if Witty isn't in /Applications) and paste the output. It lists only the options you changed from the defaults. Remove anything private first.
+      render: ini
+  - type: textarea
+    id: version-output
+    attributes:
+      label: Output of ghostty +version
+      description: |
+        Run `/Applications/Witty.app/Contents/MacOS/ghostty +version`. Its first line reads like "Ghostty 1.3.2-HEAD+463bae0f3": the version of the Ghostty core Witty is built on, plus Witty's commit. It is not Witty's own version (the About window shows that), so the word "Ghostty" there is expected.
+      render: text
+  - type: textarea
+    id: crash
+    attributes:
+      label: Crash report
+      description: |
+        If Witty crashed: crash reports stay on your Mac, in `~/.local/state/witty/crash` (or `$XDG_STATE_HOME/witty/crash` if you set `XDG_STATE_HOME`), and are not sent anywhere. `/Applications/Witty.app/Contents/MacOS/ghostty +crash-report` lists them. GitHub doesn't accept the `.ghosttycrash` file type, so zip the file and drag the zip here. Attach only what you're comfortable making public.

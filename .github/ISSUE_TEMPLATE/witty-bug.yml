@@ -3,7 +3,6 @@
 name: Bug report
 description: Something in Witty is broken, or behaves differently from Witty's docs.
 labels: ["bug", "triage"]
-type: Bug
 body:
   - type: markdown
     attributes:

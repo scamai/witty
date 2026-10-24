@@ -66,6 +66,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   form (blank issues are off), next to links for questions, for bugs that also
   happen in stock Ghostty (Ghostty's Issue Triage discussions), for Ghostty's
   docs and for security reports.
+- **`AGENTS.md` no longer tells coding agents to refuse issues and pull
+  requests.** Witty's rule replaces upstream's section: agents never open
+  issues, PRs or discussions on ghostty-org/ghostty, and open them on
+  scamai/witty only when the user asks.
+
 
 ## [witty-v0.2.1] — 2026-10-18
 

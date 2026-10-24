@@ -132,7 +132,7 @@ All Witty-only files.
 | `macos/scripts/lib_signing.sh`, `macos/scripts/test_lib_signing.sh` | Signing identity resolution, certificate expiry checks, notarization, the release asset name, the tag/version/changelog check, and their tests. |
 | `src/build/GitVersion.zig` | Skips `witty-v*` tags when it detects the core's version. Upstream's `Config.zig` panics when the built commit carries any tag other than a `vX.Y.Z` matching `build.zig.zon`, so without this a tagged Witty release cannot be built. |
 | `macos/AGENTS.md` | Release prerequisites, pitfalls and settings. |
-| `AGENTS.md` | Points at the release script. |
+| `AGENTS.md` | Upstream's file, with two Witty hunks: it points at the release script, and it replaces upstream's "Issue and PR Guidelines" section, which tells agents to refuse to open issues or PRs, with Witty's rule: never open issues, PRs or discussions on ghostty-org/ghostty, and open them on scamai/witty only when the user asks. Keep the hunks that small: upstream changed this file 11 times in the 12 months to 2026-10-24. |
 | `.gitignore` | Ignores the DMGs in `dist/`. |
 
 ### Repository automation

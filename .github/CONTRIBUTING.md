@@ -16,6 +16,7 @@ don't need anyone's approval before you open an issue or a pull request.
 - [Witty or Ghostty?](#witty-or-ghostty)
 - [Reporting bugs and asking questions](#reporting-bugs-and-asking-questions)
 - [Your first contribution](#your-first-contribution)
+- [Where things live](#where-things-live)
 - [Build and test Witty](#build-and-test-witty)
 - [Sending a pull request](#sending-a-pull-request)
 - [AI-assisted contributions](#ai-assisted-contributions)
@@ -38,7 +39,7 @@ is run. This table says which ones govern Witty.
 | [`CHANGELOG.md`](../CHANGELOG.md)                                                                                      | Yes                                     | Witty's changes on top of upstream.                                                                                                                                                  |
 | [`docs/witty-*.md`](../docs)                                                                                           | Yes                                     | The `altscreen:` guide, installing Witty, and the remote tmux workflow.                                                                                                              |
 | [`macos/AGENTS.md`](../macos/AGENTS.md)                                                                                | Yes                                     | Building and testing the macOS app, and cutting a release.                                                                                                                           |
-| [`AGENTS.md`](../AGENTS.md)                                                                                            | Partly                                  | Its build, test and formatting commands apply. Its "Issue and PR Guidelines" section is upstream's and does not apply to Witty; if your agent adds a file because of it, remove it.  |
+| [`AGENTS.md`](../AGENTS.md)                                                                                            | Yes                                     | Instructions for coding agents: the build, test and formatting commands, and Witty's rule for opening issues and pull requests.                                                      |
 | [`HACKING.md`](../HACKING.md)                                                                                          | Partly                                  | Clone `scamai/witty` instead of Ghostty; the build and test commands are the same. Its log command covers only the Zig core (see [Logs and crash reports](#logs-and-crash-reports)). |
 | [`CONTRIBUTING.md`](../CONTRIBUTING.md) at the root                                                                    | No                                      | Ghostty's process: vouching, Issue Triage discussions, Discord.                                                                                                                      |
 | [`AI_POLICY.md`](../AI_POLICY.md)                                                                                      | No, except for work you send to Ghostty | Ghostty's AI rules. Witty's are under [AI-assisted contributions](#ai-assisted-contributions).                                                                                       |
@@ -105,6 +106,23 @@ Ghostty, report it to Ghostty as a Ghostty bug, reproduced in Ghostty (see
   in the issue first.
 - Docs count. If a step in the `altscreen:` guide tripped you up, a pull
   request that fixes the guide is welcome.
+
+## Where things live
+
+Witty's own code is a small part of the tree. These are the places a Witty
+change usually touches:
+
+| Path                                                  | What is there                                                                                                            |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `src/`                                                | The shared Zig core, as in Ghostty: terminal emulation, config, keybindings and rendering.                               |
+| `src/input/Binding.zig`                               | Keybind parsing and lookup, including the `altscreen:` prefix and its fallback to the binding the key had before.        |
+| `src/Surface.zig`                                     | Where a key press picks an `altscreen:` binding: only on the alternate screen, and only while tmux has announced itself. |
+| `src/terminal/modes.zig`, `src/terminal/Terminal.zig` | The `?8771` mode (`tmux_active`) that the shell and tmux hooks from the README's Quick start set and clear.              |
+| `src/config/Config.zig`                               | Config options and default keybinds, including Witty's two macOS `altscreen:` defaults.                                  |
+| `src/config/ghostty_import.zig`                       | The one-time import of a Ghostty config.                                                                                 |
+| `src/build_config.zig`                                | `user_dir`: Witty's own config, state and cache directories.                                                             |
+| `macos/`                                              | The macOS app (Swift), and the release scripts in `macos/scripts/`.                                                      |
+| `docs/witty-*.md`, `FORK.md`                          | Witty's guides, and every place Witty differs from upstream.                                                             |
 
 ## Build and test Witty
 

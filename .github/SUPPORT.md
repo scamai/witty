@@ -58,7 +58,13 @@ for scam.ai does not cover it.
 
 ## Hearing about new versions
 
-Witty does not update itself yet, so new versions appear only on
+Releases after v0.2.1 ask before their first automatic check for new versions (unless your
+config sets `auto-update`), then check once a day if you allow it. An `auto-update` line in a
+file your Witty and Ghostty configs both include counts as your answer, so Witty doesn't ask;
+from this release on, the lines Witty copies from Ghostty's config on first launch are
+commented out, but releases up to v0.2.1 copied them unchanged, so a line copied back then
+still counts until you comment it out with cmd+, ([details](https://github.com/scamai/witty/blob/main/docs/witty-install.md#updates-and-privacy)).
+v0.2.0 and v0.2.1 never check, so new versions reach them only through
 [Releases](https://github.com/scamai/witty/releases). To hear about them, choose
 **Watch → Custom → Releases** on this repository, or subscribe to
 <https://github.com/scamai/witty/releases.atom>.

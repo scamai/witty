@@ -180,6 +180,11 @@ zig build test --summary all \
 - A filtered `zig build test` builds and runs no Swift tests. Run those with
   `macos/build.nu --action test` (it needs [Nushell](https://www.nushell.sh));
   see [macos/AGENTS.md](../macos/AGENTS.md).
+- The release scripts and the updater's release checks have tests that run
+  on any OS, without a keychain or network: `macos/scripts/test_lib_signing.sh`,
+  `macos/scripts/test_lib_update.sh`,
+  `python3 macos/scripts/test_release_checks.py` and
+  `python3 macos/scripts/update_probe.py --self-test`.
 
 The formatters and linters are listed in [AGENTS.md](../AGENTS.md) under
 "Commands", and [HACKING.md](../HACKING.md) covers the rest of the developer

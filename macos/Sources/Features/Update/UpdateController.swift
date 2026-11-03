@@ -14,10 +14,39 @@ class UpdateController {
     /// from the `WITTY_UPDATE_FEED_URL` and `WITTY_UPDATE_PUBLIC_ED_KEY` build settings,
     /// which default to empty. Until both are set the updater stays off: Sparkle is never
     /// started, so it schedules no checks and makes no network requests, and
-    /// "Check for Updates…" is hidden.
-    static let feedURL: String? = infoString("SUFeedURL")
+    /// "Check for Updates…" is hidden. A feed that `isAllowedFeedURL` refuses counts as unset.
+    static let feedURL: String? = infoString("SUFeedURL").flatMap { url in
+        guard isAllowedFeedURL(url) else {
+            AppDelegate.logger.error("updater disabled: refusing update feed \(url, privacy: .public); it must be https, or http to a loopback address, with no query")
+            return nil
+        }
+        return url
+    }
     static let publicEDKey: String? = infoString("SUPublicEDKey")
     static var isConfigured: Bool { feedURL != nil && publicEDKey != nil }
+
+    /// Witty: the hosts a plain `http` feed may use, so that a local test server can stand in
+    /// for GitHub. `URLComponents` reports an IPv6 host with or without its brackets.
+    private static let loopbackHosts: Set<String> = ["localhost", "127.0.0.1", "::1", "[::1]"]
+
+    /// Witty: true for an `https` URL with a host, or an `http` URL to a loopback host. Both
+    /// must have no query string and no user or password, because the check is one GET of a
+    /// static file that must not carry anything that could identify the user.
+    static func isAllowedFeedURL(_ string: String) -> Bool {
+        guard let components = URLComponents(string: string),
+              let scheme = components.scheme?.lowercased(),
+              let host = components.host?.lowercased(), !host.isEmpty,
+              components.query == nil,
+              components.user == nil,
+              components.password == nil
+        else { return false }
+
+        switch scheme {
+        case "https": return true
+        case "http": return loopbackHosts.contains(host)
+        default: return false
+        }
+    }
 
     private static func infoString(_ key: String) -> String? {
         guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String else { return nil }
@@ -61,6 +90,10 @@ class UpdateController {
             AppDelegate.logger.info("updater disabled: no Witty update feed and key in this build")
             return
         }
+
+        // Witty: start from no cookies for the feed's hosts, so that nothing stored by an
+        // earlier version or an earlier check goes out with the first one.
+        UpdateCookies.clear()
 
         do {
             try updater.start()

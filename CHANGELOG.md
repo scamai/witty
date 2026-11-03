@@ -8,6 +8,78 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- **Witty checks for updates, once you allow it.** Like Ghostty, a release
+  asks before its first automatic check, on its second launch (unless your
+  config sets `auto-update`), then checks once a day if you allow it; until
+  you answer, and after **Not Now**, it makes no automatic checks. A config
+  that sets `auto-update` counts as the answer, including a file the Witty and
+  Ghostty configs both include by absolute or `~/` path, which Witty reads as
+  it is. The first-launch import of Ghostty's config now comments out the
+  `auto-update` lines in the files it copies, under a note, so a setting
+  written for Ghostty does not answer for Witty. Releases up to v0.2.1 copied
+  those lines unchanged and the import runs only once, so an `auto-update`
+  line already in your Witty config still counts: comment it out (cmd+,) to
+  be asked. A check fetches a small
+  public file (`appcast.xml`) from Witty's GitHub Releases and offers a newer
+  version, which installs only when you click (or when Witty quits, if you set
+  `auto-update = download` or tick **Automatically download and install
+  updates** in Sparkle's dialog). A check sends no install ID, system profile
+  or terminal content; GitHub sees your IP address, the time and the request
+  headers, including a user agent naming Witty and its version. The appcast
+  and each update are signed with Witty's own EdDSA key, and Witty refuses
+  either if the signature does not match (`SURequireSignedFeed`,
+  `SUVerifyUpdateBeforeExtraction`). v0.2.0 and v0.2.1 never check, so install
+  the release after them by hand; in v0.1.x, don't use **Check for Updates…**,
+  which asks Ghostty's server.
+- **Update checks drop GitHub's cookies.** github.com sets a year-long cookie
+  on every response, and the URL session Sparkle uses would store it and send
+  it back, linking one day's check to the next. Each check now starts and ends
+  by deleting the cookies of
+  github.com, GitHub's download hosts and the feed's host; the DMG download
+  neither sends nor stores any; Sparkle gets no system profile keys and does
+  not fetch release notes. The updater also refuses a feed that is not HTTPS
+  (plain HTTP only to a loopback address, for testing) or that has a query
+  string. `macos/scripts/update_probe.py` is a loopback feed that redirects
+  like github.com, shows what a check sends, and fails if a check sends a
+  cookie from an earlier one.
+- **A security release can be marked critical.** With
+  `WITTY_CRITICAL_UPDATE=1`, the release script marks it so in the appcast;
+  the update popover then has no **Skip** button. It installs no sooner than
+  any other update.
+
+### Fixed
+
+- **"View Release Notes" in the update popover opens Witty's release.** It
+  linked to Ghostty's release notes for the same version number.
+- **The `auto-update` docs say what `download` does.** They said it never
+  installs an update; Sparkle installs a downloaded update when the app quits,
+  without asking.
+
+### Internal
+
+- **A tagged release cannot ship without Witty's updater.** `release.sh` stops
+  before building a `witty-v*` tag unless `WITTY_UPDATE_FEED_URL` is exactly
+  `https://github.com/scamai/witty/releases/latest/download/appcast.xml`, the
+  feed every later release replaces (a shipped app's feed never changes),
+  `WITTY_UPDATE_PUBLIC_ED_KEY` is an EdDSA public key other than Ghostty's
+  (`wsNcGf5…`), and the build number in all six app and Dock tile
+  configurations is higher than the previous tag's and the published
+  appcast's. `package_release.sh` repeats the build-number check, so a
+  repackaged app gets it too, refuses an app whose updater keys differ, or
+  any of whose code or `Info.plist` mentions `files.ghostty.org`,
+  deletes `SUEnableAutomaticChecks` from the release (as Ghostty's release
+  workflow does), and after stapling writes `appcast.xml` with Sparkle's
+  `generate_appcast`, from the Sparkle release the Xcode project pins and
+  checked by SHA-256. The appcast lists only this release, with no deltas, and
+  both signatures are verified with `sign_update`. `publish_release.sh`
+  uploads the DMG, checks GitHub's copy, uploads the appcast last and checks
+  the live feed. `release_checks.py bump X.Y.Z` sets the version and raises
+  the build number in the six configurations. The rules are in
+  `release_checks.py`, tested on any OS by `test_release_checks.py` and
+  `test_lib_update.sh`.
+
 ### Docs
 
 - **The README is a landing page for the Mac app.** It opens with a download

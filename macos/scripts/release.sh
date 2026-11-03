@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Full Witty release pipeline: ReleaseFast build → Developer ID re-sign →
-# DMG → notarize → staple. Produces dist/Witty.dmg, verified distributable
-# (dist/Witty-<version>-macos-<arch>.dmg when HEAD carries a witty-v* tag).
+# DMG → notarize → staple → signed appcast. Produces dist/Witty.dmg, verified
+# distributable; when HEAD carries a witty-v* tag, dist/Witty-<version>-macos-<arch>.dmg
+# and dist/appcast.xml, which macos/scripts/publish_release.sh uploads.
 #
 # Usage:
 #   macos/scripts/release.sh
@@ -14,8 +15,19 @@
 #                        there are several)
 #   WITTY_NOTARY_PROFILE notarytool keychain profile (default: AC_NOTARY)
 #   WITTY_UPDATE_FEED_URL, WITTY_UPDATE_PUBLIC_ED_KEY
-#                        Witty's Sparkle appcast URL and its EdDSA public key.
-#                        Without both, the release has its updater turned off.
+#                        Witty's Sparkle appcast URL
+#                        (https://github.com/scamai/witty/releases/latest/download/appcast.xml)
+#                        and the public half of Witty's EdDSA key. A tag build
+#                        fails without both, with Ghostty's key, or with any
+#                        other feed URL; an untagged build without both
+#                        only warns, and has its updater turned off.
+#   WITTY_SPARKLE_KEY_ACCOUNT
+#                        keychain account of Witty's private EdDSA key
+#                        (default: witty, as in `generate_keys --account witty`)
+#   WITTY_CRITICAL_UPDATE=1
+#                        mark the release critical in the appcast (a security
+#                        fix): it cannot be skipped, and installs no sooner
+#                        than any other update
 #
 # One-time prereqs:
 #   1. Developer ID Application cert in the login keychain
@@ -24,6 +36,8 @@
 #        xcrun notarytool store-credentials "AC_NOTARY" \
 #          --apple-id "<apple-id>" --team-id "<TEAMID>"
 #      (it prompts for an app-specific password; keep it out of shell history)
+#   3. Witty's EdDSA key in the keychain under WITTY_SPARKLE_KEY_ACCOUNT. Never
+#      in the repository or CI; see macos/AGENTS.md.
 #
 # Pitfalls this script guards against:
 #   - ~/.local/bin/zig is a 0.15.2 shim; this repo requires >= 0.16.0.
@@ -36,6 +50,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=lib_signing.sh
 . "$SCRIPT_DIR/lib_signing.sh"
+# shellcheck source=lib_update.sh
+. "$SCRIPT_DIR/lib_update.sh"
 
 IDENTITY="$(resolve_sign_identity)"
 PROFILE="${WITTY_NOTARY_PROFILE:-AC_NOTARY}"
@@ -43,10 +59,15 @@ PROFILE="${WITTY_NOTARY_PROFILE:-AC_NOTARY}"
 check_cert_validity "$IDENTITY"
 
 # zig build reads both from the environment; the app's updater stays off
-# unless it gets the two together.
-if [ -z "${WITTY_UPDATE_FEED_URL:-}" ] || [ -z "${WITTY_UPDATE_PUBLIC_ED_KEY:-}" ]; then
+# unless it gets the two together. A release must have Witty's own and a build
+# number its users' Sparkle will see as new.
+TAG="$(resolve_release_tag "$REPO_ROOT")"
+if [ -n "$TAG" ]; then
+  echo "==> Checking the updater settings for $TAG…"
+  check_release_update_settings "$TAG" "$REPO_ROOT"
+elif [ -z "${WITTY_UPDATE_FEED_URL:-}" ] || [ -z "${WITTY_UPDATE_PUBLIC_ED_KEY:-}" ]; then
   echo "warning: WITTY_UPDATE_FEED_URL and WITTY_UPDATE_PUBLIC_ED_KEY are not both set;" \
-    "this release ships with its updater turned off" >&2
+    "this untagged build has its updater turned off" >&2
 fi
 
 # Pick a zig that meets the repo's minimum version.

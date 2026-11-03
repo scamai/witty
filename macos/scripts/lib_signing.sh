@@ -63,6 +63,16 @@ check_cert_validity() {
   security find-certificate -c "$1" -p 2>/dev/null | check_cert_validity_pem "$1"
 }
 
+# Print the release tag of the repository at $1: $WITTY_RELEASE_TAG if set, else
+# the witty-v* tag at HEAD, else nothing (an untagged build).
+resolve_release_tag() {
+  if [ -n "${WITTY_RELEASE_TAG:-}" ]; then
+    echo "$WITTY_RELEASE_TAG"
+  else
+    git -C "$1" describe --exact-match --tags --match 'witty-v*' 2>/dev/null || true
+  fi
+}
+
 # Fail unless a release tag, the app being packaged and CHANGELOG.md agree:
 # $1 is the tag (witty-vX.Y.Z), $2 the app's CFBundleShortVersionString, $3 the
 # changelog, which needs a "## [witty-vX.Y.Z]" section. A DMG named for one

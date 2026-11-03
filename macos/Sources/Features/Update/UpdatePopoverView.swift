@@ -163,11 +163,15 @@ private struct UpdateAvailableView: View {
                 }
 
                 HStack(spacing: 8) {
-                    Button("Skip") {
-                        update.reply(.skip)
-                        dismiss()
+                    // Witty: a release marked critical in the appcast (a security fix)
+                    // cannot be skipped, as in Sparkle's own alert.
+                    if !update.appcastItem.isCriticalUpdate {
+                        Button("Skip") {
+                            update.reply(.skip)
+                            dismiss()
+                        }
+                        .controlSize(.small)
                     }
-                    .controlSize(.small)
 
                     Button("Later") {
                         update.reply(.dismiss)

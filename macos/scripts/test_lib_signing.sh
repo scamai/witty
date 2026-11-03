@@ -87,6 +87,19 @@ else
   pass "unknown architectures fail"
 fi
 
+# ─── resolve_release_tag ───
+
+git -C "$TMP" init -q tagrepo
+git -C "$TMP/tagrepo" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m one
+git -C "$TMP/tagrepo" tag v1.0.0 # an upstream-style tag is not a Witty release
+out="$(run_lib resolve_release_tag "$TMP/tagrepo")"
+[ -z "$out" ] && pass "an untagged HEAD has no release tag" || fail "untagged HEAD: got '$out'"
+git -C "$TMP/tagrepo" -c user.name=t -c user.email=t@example.com tag -a witty-v0.3.0 -m 0.3.0
+out="$(run_lib resolve_release_tag "$TMP/tagrepo")"
+[ "$out" = "witty-v0.3.0" ] && pass "the witty-v* tag at HEAD is the release tag" || fail "tagged HEAD: got '$out'"
+out="$(WITTY_RELEASE_TAG=witty-v0.2.9 run_lib resolve_release_tag "$TMP/tagrepo")"
+[ "$out" = "witty-v0.2.9" ] && pass "WITTY_RELEASE_TAG overrides the tag at HEAD" || fail "tag override: got '$out'"
+
 # ─── check_release_version ───
 
 # The prose mention of witty-v0.3.0 must not count as its section.

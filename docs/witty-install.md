@@ -52,6 +52,15 @@ are, and Witty logs each one. The copy happens once. It never changes
 Ghostty's files and never overwrites Witty's, and later edits to Ghostty's
 config don't carry over.
 
+In the files it copies, Witty (from the release after v0.2.1 on) comments out
+each `auto-update` line, with a note above it, so that it asks you itself
+before its first automatic update check (see
+[Updates and privacy](#updates-and-privacy)). v0.2.1 and earlier copied those
+lines unchanged, and the copy happens only once, so check an existing config. To keep the
+setting, delete the `#` in front of it. Witty can't do this in a file it
+doesn't copy: an `auto-update` line in a file both apps include by absolute
+or `~/` path counts as your answer for Witty too, so Witty doesn't ask.
+
 With no Ghostty config, Witty writes its starter config to
 `~/Library/Application Support/ai.scam.witty/config.ghostty`.
 
@@ -85,12 +94,54 @@ Witty uses `~/.config/witty` and `ai.scam.witty`.
 
 ## Updates and privacy
 
-Witty doesn't update itself yet. Its updater stays off until Witty has an
-update feed of its own, so it makes no update checks and **Check for
-Updates…** is hidden. New versions appear on
-[Releases](https://github.com/scamai/witty/releases); on GitHub,
-**Watch → Custom → Releases** tells you when one is out. To update, download
-the new DMG and replace the app in Applications. There is no Homebrew cask.
+Releases after v0.2.1 ask before their first automatic update check (unless
+your config sets `auto-update`), then check once a day if you allow it. The
+question comes on Witty's second launch; until you answer, and after
+**Not Now**, Witty makes no automatic checks. Setting `auto-update` in your
+config counts as the answer, so Witty doesn't ask. That includes a file your
+Witty and Ghostty configs both include by absolute or `~/` path: Witty reads
+it as it is, so a line you wrote there for Ghostty answers for Witty too. From
+this release on, the first-launch copy of Ghostty's config comments out its
+`auto-update` lines, so they don't count
+([how to keep one](#first-launch-and-your-ghostty-config)). Releases up to
+v0.2.1 copied those lines unchanged, and the copy happens only once, so an
+`auto-update` line copied back then is still in your Witty config and still
+counts as your answer. To be asked instead, open the config with **cmd+,**
+and comment that line out, before or after you upgrade.
+**Witty → Check for Updates…** checks once, whenever you choose it.
+
+A check fetches one small public file, `appcast.xml`, from Witty's
+[GitHub Releases](https://github.com/scamai/witty/releases), at most once a
+day. It sends no install ID, system profile or terminal content. GitHub sees
+your IP address, the time and the request headers, including a user agent
+naming Witty and its version (`Witty/<version> Sparkle/<version>`). The file
+and each update are signed with Witty's own key, and Witty refuses either if
+the signature doesn't match.
+
+What happens when there is a new version depends on `auto-update`:
+
+| `auto-update`   | Automatic checks          | A new version installs                                         |
+| --------------- | ------------------------- | -------------------------------------------------------------- |
+| unset (default) | daily, after you allow it | when you click to install it                                   |
+| `check`         | daily                     | when you click to install it                                   |
+| `download`      | daily                     | when Witty quits, without asking, after downloading on its own |
+| `off`           | none                      | when you click to install it after **Check for Updates…**      |
+
+When no Witty window is open, the question comes in Sparkle's own dialog,
+whose **Automatically download and install updates** box does the same as
+`download`. A release marked critical, such as a security fix, has no
+**Skip** button; it installs as the table says.
+
+**v0.2.0 and v0.2.1 never check:** they were built without an update feed, so
+**Check for Updates…** is hidden. Install the release after them by hand:
+download the new DMG from
+[Releases](https://github.com/scamai/witty/releases) and replace the app in
+Applications. On GitHub, **Watch → Custom → Releases** tells you when a
+release is out. There is no Homebrew cask.
+
+**In v0.1.x, don't use Check for Updates…:** it asks Ghostty's update server,
+not Witty's. Replace the old app as described in
+[Upgrading from v0.1.x](#upgrading-from-v01x).
 
 Crash reports stay on your machine, in `$XDG_STATE_HOME/witty/crash`.
 

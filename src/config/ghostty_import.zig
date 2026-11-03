@@ -22,6 +22,11 @@
 //!     both apps, so they are not copied, only logged;
 //!   - copies the user theme directory (`themes/`) so `theme = <name>` keeps
 //!     resolving;
+//!   - comments out each `auto-update` line in the copies, under a note.
+//!     Witty asks before its first automatic update check unless the config
+//!     sets `auto-update`, and a setting written for Ghostty is not an answer
+//!     given to Witty. An absolute or `~/` include is not copied, so a line
+//!     there still counts for both apps;
 //!   - logs each file it copies. Errors are logged and never stop Witty from
 //!     loading its config.
 const std = @import("std");
@@ -30,7 +35,8 @@ const Allocator = std.mem.Allocator;
 const build_config = @import("../build_config.zig");
 const internal_os = @import("../os/main.zig");
 const global = @import("../global.zig");
-const whitespace = @import("../cli.zig").args.whitespace;
+const args = @import("../cli.zig").args;
+const whitespace = args.whitespace;
 
 const log = std.log.scoped(.config);
 
@@ -49,6 +55,11 @@ const themes_dir = "themes";
 /// The largest file the import copies. Config files and themes are a few
 /// kilobytes; anything far bigger is not a config file.
 const max_file_size = 4 * 1024 * 1024;
+
+/// The comment the import writes above each `auto-update` line it comments
+/// out of a copy.
+const auto_update_note = "# Witty asks for itself before its first automatic update check, " ++
+    "so it commented out Ghostty's setting below. Remove the \"# \" to keep it.";
 
 /// A Ghostty config directory and the Witty directory it is imported into.
 pub const Location = struct {
@@ -227,7 +238,14 @@ const Importer = struct {
             try self.copyInclude(loc, src, dst, include);
         }
 
-        self.write(src, dst, content, stat.permissions);
+        const copy = if (try commentOutAutoUpdate(self.arena, content)) |edited| copy: {
+            log.info(
+                "commenting out auto-update in Witty's copy of {s}; Witty asks for itself",
+                .{src},
+            );
+            break :copy edited;
+        } else content;
+        self.write(src, dst, copy, stat.permissions);
     }
 
     /// Handle one `config-file` include of `src`, whose copy is `dst`.
@@ -390,17 +408,63 @@ const Include = struct {
 /// trimmed key and value, one pair of quotes, then an optional `?` prefix
 /// and one more pair of quotes.
 fn parseInclude(raw: []const u8) ?Include {
-    const line = std.mem.trim(u8, raw, whitespace ++ "\r");
-    if (line.len == 0 or line[0] == '#') return null;
-    const eql = std.mem.indexOfScalar(u8, line, '=') orelse return null;
-    const key = std.mem.trim(u8, line[0..eql], whitespace);
-    if (!std.mem.eql(u8, key, "config-file")) return null;
+    const entry = parseEntry(raw) orelse return null;
+    if (!std.mem.eql(u8, entry.key, "config-file")) return null;
 
-    var value = unquote(std.mem.trim(u8, line[eql + 1 ..], whitespace));
+    var value = unquote(entry.value orelse return null);
     const optional = value.len > 0 and value[0] == '?';
     if (optional) value = unquote(value[1..]);
     if (value.len == 0) return null;
     return .{ .path = value, .optional = optional };
+}
+
+const Entry = struct {
+    key: []const u8,
+
+    /// Null when the line has no `=`.
+    value: ?[]const u8,
+};
+
+/// The key and value of a config line as `cli.args.LineIterator` splits
+/// it, both trimmed, or null for a blank line or a comment.
+fn parseEntry(raw: []const u8) ?Entry {
+    const line = std.mem.trim(u8, raw, whitespace ++ "\r");
+    if (line.len == 0 or line[0] == '#') return null;
+    const eql = std.mem.indexOfScalar(u8, line, '=') orelse
+        return .{ .key = line, .value = null };
+    return .{
+        .key = std.mem.trim(u8, line[0..eql], whitespace),
+        .value = std.mem.trim(u8, line[eql + 1 ..], whitespace),
+    };
+}
+
+/// `content` with each line that sets `auto-update` commented out under
+/// `auto_update_note`, or null when no line sets it. Line endings, CRLF
+/// included, are kept.
+fn commentOutAutoUpdate(arena: Allocator, content: []const u8) Allocator.Error!?[]const u8 {
+    var out: std.ArrayList(u8) = .empty;
+    var changed = false;
+    var first = true;
+    var lines = std.mem.splitScalar(u8, content, '\n');
+    while (lines.next()) |line| {
+        if (!first) try out.append(arena, '\n');
+        first = false;
+
+        if (setsAutoUpdate(line)) {
+            changed = true;
+            const eol: []const u8 = if (std.mem.endsWith(u8, line, "\r")) "\r\n" else "\n";
+            try out.appendSlice(arena, auto_update_note);
+            try out.appendSlice(arena, eol);
+            try out.appendSlice(arena, "# ");
+        }
+        try out.appendSlice(arena, line);
+    }
+    return if (changed) out.items else null;
+}
+
+fn setsAutoUpdate(line: []const u8) bool {
+    const entry = parseEntry(line) orelse return false;
+    return std.mem.eql(u8, entry.key, "auto-update");
 }
 
 fn unquote(value: []const u8) []const u8 {
@@ -553,6 +617,74 @@ test "ghostty import: included files are copied" {
     try dirs.missing("witty/missing.conf");
     try dirs.missing("witty/outside.conf");
     try dirs.missing("witty/home.conf");
+}
+
+/// How many settings, and how many `auto-update` settings, the config
+/// parser reads from `data`.
+fn countSettings(data: []const u8) struct { all: usize, auto_update: usize } {
+    var reader: std.Io.Reader = .fixed(data);
+    var iter: args.LineIterator = .init(&reader);
+    var all: usize = 0;
+    var auto_update: usize = 0;
+    while (iter.next()) |arg| {
+        // `arg` is `--key` or `--key=value`.
+        const key = arg[2 .. std.mem.indexOfScalar(u8, arg, '=') orelse arg.len];
+        all += 1;
+        if (std.mem.eql(u8, key, "auto-update")) auto_update += 1;
+    }
+    return .{ .all = all, .auto_update = auto_update };
+}
+
+test "ghostty import: auto-update lines are commented out" {
+    var dirs: TestDirs = try .init();
+    defer dirs.deinit();
+    // Every way of writing a line the config parser reads as `auto-update`,
+    // and lines it does not.
+    const config = "font-size = 13\n" ++
+        "auto-update = download\n" ++
+        "  auto-update=check\r\n" ++
+        "auto-update\n" ++
+        "auto-update-channel = tip\n" ++
+        "# auto-update = off\n" ++
+        "config-file = updates.conf\n" ++
+        "config-file = ~/shared.conf\n" ++
+        "auto-update = off";
+    try dirs.write("ghostty/config", config);
+    try dirs.write("ghostty/updates.conf", "auto-update = check\n");
+    // Named by `~/`, so both apps read this one file.
+    try dirs.write("shared.conf", "auto-update = download\n");
+
+    // The parser reads four `auto-update` settings from Ghostty's config.
+    try testing.expectEqual(4, countSettings(config).auto_update);
+    try testing.expectEqual(8, countSettings(config).all);
+
+    // config and updates.conf.
+    try testing.expectEqual(2, try dirs.import(&.{try dirs.location("ghostty", "witty")}));
+
+    const note = auto_update_note;
+    const expected = "font-size = 13\n" ++
+        note ++ "\n# auto-update = download\n" ++
+        note ++ "\r\n#   auto-update=check\r\n" ++
+        note ++ "\n# auto-update\n" ++
+        "auto-update-channel = tip\n" ++
+        "# auto-update = off\n" ++
+        "config-file = updates.conf\n" ++
+        "config-file = ~/shared.conf\n" ++
+        note ++ "\n# auto-update = off";
+    const copy = try dirs.read("witty/config");
+    try testing.expectEqualStrings(expected, copy);
+    try testing.expectEqualStrings(note ++ "\n# auto-update = check\n", try dirs.read("witty/updates.conf"));
+
+    // Witty's copies set no `auto-update` and keep every other setting.
+    try testing.expectEqual(0, countSettings(copy).auto_update);
+    try testing.expectEqual(4, countSettings(copy).all);
+    try testing.expectEqual(0, countSettings(try dirs.read("witty/updates.conf")).all);
+
+    // Ghostty's files are unchanged, and so is the file both apps read: its
+    // line still sets `auto-update` for Witty.
+    try testing.expectEqualStrings(config, try dirs.read("ghostty/config"));
+    try testing.expectEqualStrings("auto-update = check\n", try dirs.read("ghostty/updates.conf"));
+    try testing.expectEqualStrings("auto-update = download\n", try dirs.read("shared.conf"));
 }
 
 test "ghostty import: never writes outside Witty's directory" {

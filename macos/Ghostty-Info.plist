@@ -110,6 +110,12 @@
 	<string>$(WITTY_UPDATE_FEED_URL)</string>
 	<key>SUPublicEDKey</key>
 	<string>$(WITTY_UPDATE_PUBLIC_ED_KEY)</string>
+	<key>SURequireSignedFeed</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

@@ -63,7 +63,7 @@ check_cert_validity "$IDENTITY"
 # number its users' Sparkle will see as new.
 TAG="$(resolve_release_tag "$REPO_ROOT")"
 if [ -n "$TAG" ]; then
-  echo "==> Checking the updater settings for $TAG…"
+  echo "==> Checking the updater settings for ${TAG}…"
   check_release_update_settings "$TAG" "$REPO_ROOT"
 elif [ -z "${WITTY_UPDATE_FEED_URL:-}" ] || [ -z "${WITTY_UPDATE_PUBLIC_ED_KEY:-}" ]; then
   echo "warning: WITTY_UPDATE_FEED_URL and WITTY_UPDATE_PUBLIC_ED_KEY are not both set;" \

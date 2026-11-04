@@ -154,15 +154,29 @@ class ProjectTests(unittest.TestCase):
 
     def test_bump_changes_only_the_six_configurations(self):
         version, build = rc.project_versions(self.text)
-        bumped, new_build = rc.bump(self.text, "0.3.0")
+        next_version = f"{int(version.split('.')[0]) + 1}.0.0"
+        bumped, new_build = rc.bump(self.text, next_version)
         self.assertEqual(new_build, build + 1)
-        self.assertEqual(rc.project_versions(bumped), ("0.3.0", build + 1))
+        self.assertEqual(rc.project_versions(bumped), (next_version, build + 1))
         changed = [(a, b) for a, b in zip(self.text.splitlines(), bumped.splitlines()) if a != b]
         self.assertEqual(len(changed), 12)  # six build numbers, six marketing versions
         self.assertEqual(len(bumped.splitlines()), len(self.text.splitlines()))
         # The test targets keep upstream's placeholders.
         self.assertEqual(self.text.count("CURRENT_PROJECT_VERSION = 1;") - (6 if build == 1 else 0),
                          bumped.count("CURRENT_PROJECT_VERSION = 1;"))
+
+    def test_bump_same_version_changes_only_build_numbers(self):
+        version, build = rc.project_versions(self.text)
+        bumped, new_build = rc.bump(self.text, version)
+        self.assertEqual(new_build, build + 1)
+        self.assertEqual(rc.project_versions(bumped), (version, build + 1))
+        before, after = self.text.splitlines(), bumped.splitlines()
+        self.assertEqual(len(before), len(after))
+        changed = [(a, b) for a, b in zip(before, after) if a != b]
+        self.assertEqual(len(changed), 6)
+        for old, new in changed:
+            self.assertEqual(old.strip(), f"CURRENT_PROJECT_VERSION = {build};")
+            self.assertEqual(new.strip(), f"CURRENT_PROJECT_VERSION = {build + 1};")
 
     def test_bump_rejects_a_malformed_version(self):
         self.assertTrue(problems(rc.bump, self.text, "0.3"))

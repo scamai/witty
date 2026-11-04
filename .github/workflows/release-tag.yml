@@ -22,6 +22,8 @@ concurrency:
 
 jobs:
   setup:
+    # Witty: Ghostty's release runners exist only in ghostty-org. The other jobs need this one.
+    if: github.repository == 'ghostty-org/ghostty'
     runs-on: namespace-profile-ghostty-sm
     outputs:
       version: ${{ steps.extract_version.outputs.version }}

@@ -79,7 +79,8 @@ jobs:
 
   required:
     name: "Required Checks: Test"
-    if: always()
+    # Witty: always() would queue this job for a Namespace runner that never comes.
+    if: always() && github.repository == 'ghostty-org/ghostty'
     runs-on: namespace-profile-ghostty-xsm
     needs:
       - skip

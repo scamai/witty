@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [witty-v0.3.0] — 2026-11-03
+
 ### Added
 
 - **Witty checks for updates, once you allow it.** Like Ghostty, a release
@@ -50,6 +52,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   any other update.
 
 ### Fixed
+
+- **Tagged releases build on macOS Bash 3.2.** The release script now delimits
+  the tag variable before its progress-message punctuation.
 
 - **"View Release Notes" in the update popover opens Witty's release.** It
   linked to Ghostty's release notes for the same version number.
@@ -445,6 +450,7 @@ d972d63 fix(input): altscreen gate continues the trigger chain instead of aborti
 8103116 feat(input): add altscreen: keybind prefix
 ```
 
+[witty-v0.3.0]: https://github.com/scamai/witty/releases/tag/witty-v0.3.0
 [witty-v0.2.1]: https://github.com/scamai/witty/releases/tag/witty-v0.2.1
 [witty-v0.2.0]: https://github.com/scamai/witty/releases/tag/witty-v0.2.0
 [witty-v0.1.1]: https://github.com/scamai/witty/releases/tag/witty-v0.1.1

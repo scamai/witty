@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Package a distributable, notarized Witty DMG from the ReleaseLocal build.
+# Package a distributable, notarized Witty DMG from the ReleaseLocal build, and
+# for a tagged release the signed appcast that offers it to Witty's updater.
 # Modeled on halo's scripts/sign_and_notarize.sh.
 #
 # Build first (Developer ID signed, hardened runtime comes from the Xcode
@@ -29,13 +30,24 @@
 #                        named for upload: dist/Witty-v0.1.4-macos-<arch>.dmg,
 #                        and the app's version and CHANGELOG.md must match it.
 #   WITTY_DMG            output path (default: dist/Witty.dmg without a tag,
-#                        else the name above)
+#                        else the name above). A tagged release also writes
+#                        appcast.xml next to it.
+#   WITTY_UPDATE_FEED_URL, WITTY_UPDATE_PUBLIC_ED_KEY
+#                        when set, the app's SUFeedURL and SUPublicEDKey must
+#                        equal them. A tagged release must carry Witty's own feed
+#                        and key either way, and a build number higher than the
+#                        previous tag's and the one the published appcast (at
+#                        WITTY_UPDATE_FEED_URL, else the app's SUFeedURL) offers.
+#   WITTY_SPARKLE_KEY_ACCOUNT, WITTY_CRITICAL_UPDATE
+#                        see release.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=lib_signing.sh
 . "$SCRIPT_DIR/lib_signing.sh"
+# shellcheck source=lib_update.sh
+. "$SCRIPT_DIR/lib_update.sh"
 
 APP="${WITTY_APP:-${REPO_ROOT}/macos/build/ReleaseLocal/Witty.app}"
 
@@ -44,16 +56,18 @@ PROFILE="${2:-AC_NOTARY}"
 
 [ -d "${APP}" ] || { echo "error: ${APP} not found — run the zig build above first"; exit 1; }
 
-TAG="${WITTY_RELEASE_TAG:-$(git -C "${REPO_ROOT}" describe --exact-match --tags --match 'witty-v*' 2>/dev/null || true)}"
+TAG="$(resolve_release_tag "${REPO_ROOT}")"
 if [ -n "${TAG}" ]; then
   check_release_version "${TAG}" \
     "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${APP}/Contents/Info.plist")" \
     "${REPO_ROOT}/CHANGELOG.md"
+  BUILD="$(release_checks project "${REPO_ROOT}/macos/Ghostty.xcodeproj/project.pbxproj")"
   DMG_NAME="$(release_dmg_name "${TAG}" "$(lipo -archs "${APP}/Contents/MacOS/ghostty")")"
 else
   DMG_NAME="Witty.dmg"
 fi
 DMG="${WITTY_DMG:-${REPO_ROOT}/dist/${DMG_NAME}}"
+APPCAST="$(dirname "${DMG}")/appcast.xml"
 
 echo "==> Signing identity: ${DEV_ID}"
 echo "==> Notary profile:   ${PROFILE}"
@@ -67,10 +81,31 @@ CODESIGN_FLAGS=(--force --options runtime --timestamp)
 WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
 
+# Everything that changes the bundle happens before it is signed.
+echo "==> Checking the updater…"
+prepare_release_plist "${APP}"
+if [ -n "${TAG}" ]; then
+  # An appcast from an earlier run must never sit next to this DMG.
+  rm -f "${APPCAST}"
+  app_check=("${APP}" --build "${BUILD}")
+  [ -z "${WITTY_UPDATE_FEED_URL:-}" ] || app_check+=(--feed "${WITTY_UPDATE_FEED_URL}")
+  [ -z "${WITTY_UPDATE_PUBLIC_ED_KEY:-}" ] || app_check+=(--key "${WITTY_UPDATE_PUBLIC_ED_KEY}")
+  release_checks app "${app_check[@]}"
+  # release.sh checked this before building; a repackaged app gets the same check, so
+  # a build number users' Sparkle would ignore as not newer is never signed. The
+  # app's feed passed the check above.
+  WITTY_UPDATE_FEED_URL="${WITTY_UPDATE_FEED_URL:-$(/usr/libexec/PlistBuddy -c 'Print :SUFeedURL' "${APP}/Contents/Info.plist")}" \
+    check_build_number "${TAG}" "${REPO_ROOT}" >/dev/null
+  critical_update_flag >/dev/null
+else
+  release_checks scan "${APP}"
+fi
+echo "    updater OK"
+
 # xcodebuild's manual signing produces no secure timestamp, which the notary
 # rejects — so always re-sign inside-out here (same as halo's pipeline).
 
-echo "==> 1/7 Signing Sparkle.framework helpers inside-out…"
+echo "==> 1/8 Signing Sparkle.framework helpers inside-out…"
 SPARKLE_FW="${APP}/Contents/Frameworks/Sparkle.framework"
 if [ -d "${SPARKLE_FW}" ]; then
   SPARKLE_V="${SPARKLE_FW}/Versions/B"
@@ -93,7 +128,7 @@ for PLUGIN in "${APP}"/Contents/PlugIns/*.plugin; do
   echo "    $(basename "${PLUGIN}") signed"
 done
 
-echo "==> 2/7 Signing the app bundle (hardened runtime + entitlements)…"
+echo "==> 2/8 Signing the app bundle (hardened runtime + entitlements)…"
 codesign "${CODESIGN_FLAGS[@]}" \
          --entitlements "${ENTITLEMENTS}" \
          --sign "${DEV_ID}" "${APP}"
@@ -103,15 +138,15 @@ echo "    codesign verify OK"
 
 # The app gets its own ticket so it passes Gatekeeper offline after it is
 # dragged out of the DMG; a ticket stapled only to the DMG stays behind.
-echo "==> 3/7 Notarizing the app…"
+echo "==> 3/8 Notarizing the app…"
 ditto -c -k --keepParent "${APP}" "${WORK}/Witty.zip"
 notarize "${WORK}/Witty.zip" "${PROFILE}"
 
-echo "==> 4/7 Stapling the app…"
+echo "==> 4/8 Stapling the app…"
 xcrun stapler staple "${APP}"
 xcrun stapler validate "${APP}"
 
-echo "==> 5/7 Building and signing the DMG…"
+echo "==> 5/8 Building and signing the DMG…"
 mkdir -p "$(dirname "${DMG}")"
 rm -f "${DMG}"
 if command -v create-dmg >/dev/null 2>&1; then
@@ -124,14 +159,24 @@ codesign --force --timestamp --sign "${DEV_ID}" "${DMG}"
 codesign --verify --strict --verbose=2 "${DMG}"
 echo "    ${DMG}"
 
-echo "==> 6/7 Notarizing and stapling the DMG…"
+echo "==> 6/8 Notarizing and stapling the DMG…"
 notarize "${DMG}" "${PROFILE}"
 xcrun stapler staple "${DMG}"
 xcrun stapler validate "${DMG}"
 
-echo "==> 7/7 Gatekeeper checks…"
+echo "==> 7/8 Gatekeeper checks…"
 spctl --assess --type open --context context:primary-signature --verbose=2 "${DMG}"
 spctl --assess --type execute --verbose=2 "${APP}"
 syspolicy_check distribution "${APP}"
 
-echo "==> Done. Distributable: ${DMG}"
+# Last, because the appcast signs the DMG's final bytes, ticket included.
+if [ -n "${TAG}" ]; then
+  echo "==> 8/8 Generating and signing the appcast…"
+  generate_signed_appcast "${TAG}" "${DMG}" "${BUILD}" "${APPCAST}" "${WORK}"
+  echo "    ${APPCAST}"
+  echo "==> Done. Distributable: ${DMG}"
+  echo "    Upload both with macos/scripts/publish_release.sh: the DMG first, the appcast last."
+else
+  echo "==> 8/8 No appcast for an untagged build."
+  echo "==> Done. Distributable: ${DMG}"
+fi

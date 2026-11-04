@@ -107,19 +107,35 @@ never sees Witty-only syntax.
 | `src/config/theme.zig` | User themes in `$XDG_CONFIG_HOME/witty/themes`. |
 | `src/crash/dir.zig`, `src/crash/sentry.zig` | Crash reports in `$XDG_STATE_HOME/witty/crash`, the Sentry cache in `$XDG_CACHE_HOME/witty/sentry`. |
 | `src/cli/ssh.zig`, `src/cli/ssh_cache.zig` | The SSH terminfo cache in `$XDG_STATE_HOME/witty/ssh_cache`. |
-| `src/config/ghostty_import.zig` | Witty-only file. On first launch, if Witty has no config and Ghostty has one, copies Ghostty's config files, their relative `config-file` includes and `themes/` into Witty's directories. Never modifies Ghostty's files, never overwrites Witty's. |
+| `src/config/ghostty_import.zig` | Witty-only file. On first launch, if Witty has no config and Ghostty has one, copies Ghostty's config files, their relative `config-file` includes and `themes/` into Witty's directories, commenting out each `auto-update` line under a note (see [Updater](#updater)). Never modifies Ghostty's files, never overwrites Witty's. |
 | `src/config/Config.zig` | `loadDefaultFiles` runs that import before it would write the template config. |
 | `macos/Sources/Ghostty/Ghostty.Config.swift` | The default `macos-custom-icon` is `~/.config/witty/Ghostty.icns`. |
 
 ### Updater
 
+A release asks before its first automatic check (unless the config sets
+`auto-update`), then, if allowed, checks one signed, static `appcast.xml` on
+Witty's GitHub Releases at most once a day. The request carries no install ID,
+system profile or query string, and no cookie from an earlier check: cookies
+GitHub sets during a check's redirects are deleted when it ends.
+
+An `auto-update` line counts as the answer. `src/config/ghostty_import.zig`
+comments out the ones in the files it copies from Ghostty, so a setting
+written for Ghostty does not answer for Witty. A file both configs include by
+absolute or `~/` path is read where it is and cannot be rewritten, so a line
+there still counts for both apps; the docs say so.
+
 | File | What and why |
 | --- | --- |
-| `macos/Sources/Features/Update/UpdateController.swift` | Reads the feed URL and EdDSA key from the Info.plist. Without both, Sparkle is never started: no scheduled checks and no network requests. |
-| `macos/Sources/Features/Update/UpdateDelegate.swift` | Returns Witty's feed instead of Ghostty's tip and release appcasts. `auto-update-channel` has no effect. |
-| `macos/Ghostty-Info.plist` | `SUFeedURL = $(WITTY_UPDATE_FEED_URL)` and `SUPublicEDKey = $(WITTY_UPDATE_PUBLIC_ED_KEY)` instead of Ghostty's key. Both are empty unless the build sets them. |
+| `macos/Sources/Features/Update/UpdateController.swift` | Reads the feed URL and EdDSA key from the Info.plist. Without both, Sparkle is never started: no scheduled checks and no network requests. Refuses a feed that is not `https` (plain `http` only to a loopback host, for `update_probe.py`) or has a query string or credentials, and deletes the update hosts' cookies before starting Sparkle. |
+| `macos/Sources/Features/Update/UpdateDelegate.swift` | Returns Witty's feed instead of Ghostty's tip and release appcasts. `auto-update-channel` has no effect. Keeps a check to one request: no system profile keys, no release-notes download, the cookies of github.com, githubusercontent.com and the feed's host deleted before and after every check (`UpdateCookies`), and none sent or stored with the DMG download. The hooks spell out their Objective-C selectors, the names Sparkle looks for. |
+| `macos/Ghostty-Info.plist` | `SUFeedURL = $(WITTY_UPDATE_FEED_URL)` and `SUPublicEDKey = $(WITTY_UPDATE_PUBLIC_ED_KEY)` instead of Ghostty's key; both are empty unless the build sets them. `SURequireSignedFeed`, `SUVerifyUpdateBeforeExtraction` and `SUScheduledCheckInterval = 86400` are Witty's. `SUEnableAutomaticChecks` stays `false` as upstream's, so development builds never check on their own; `package_release.sh` deletes it from a release, as upstream's `release-tag.yml` does, so Sparkle asks on the second launch. |
 | `macos/Sources/App/AppDelegate.swift` | Hides "Check for Updates…" and leaves Sparkle's settings alone while the updater is off. |
 | `macos/Sources/Ghostty/Ghostty.Command.swift` | Drops "Check for Updates" from the command palette while the updater is off. |
+| `macos/Sources/Features/Update/UpdateViewModel.swift` | "View Release Notes" opens the version's `witty-v<version>` GitHub release, not Ghostty's release notes for the same number. |
+| `macos/Sources/Features/Update/UpdatePopoverView.swift` | No **Skip** button for an update the appcast marks critical, as in Sparkle's own alert. |
+| `src/config/Config.zig` | The `auto-update` docs say that `download` installs a downloaded update when the app quits, without asking (upstream's say it never installs), that release builds ask on the second launch, that setting it counts as the answer, and that the Ghostty import comments it out but a file both apps include still sets it. |
+| `macos/Tests/Update/UpdatePrivacyTests.swift`, `macos/Tests/Update/ReleaseNotesTests.swift` | The feed URL rule, the profile and release-notes hooks, two of the four cookie clears (no test reaches the other two; on a Mac, `update_probe.py` checks what the four do together), the DMG download's cookie setting, and the Witty release-notes link. The first file is Witty-only. |
 
 ### Release tooling
 
@@ -127,13 +143,17 @@ All Witty-only files.
 
 | File | What and why |
 | --- | --- |
-| `macos/scripts/release.sh` | ReleaseFast build, Developer ID signing, DMG, notarization, stapling. Warns when the updater settings are missing. |
-| `macos/scripts/package_release.sh` | Re-signs inside-out with a secure timestamp, notarizes and staples app and DMG. A `witty-v*` tag names the DMG `Witty-<version>-macos-<arch>.dmg`, and is refused unless the app's version and a `CHANGELOG.md` section match it. |
-| `macos/scripts/lib_signing.sh`, `macos/scripts/test_lib_signing.sh` | Signing identity resolution, certificate expiry checks, notarization, the release asset name, the tag/version/changelog check, and their tests. |
+| `macos/scripts/release.sh` | ReleaseFast build, Developer ID signing, DMG, notarization, stapling, appcast. A `witty-v*` tag build stops before building unless `WITTY_UPDATE_FEED_URL` is exactly `https://github.com/scamai/witty/releases/latest/download/appcast.xml` (the shipped app can never change its feed, and every later release replaces the appcast there), `WITTY_UPDATE_PUBLIC_ED_KEY` is an EdDSA public key other than Ghostty's, the Sparkle tools match the framework, and the build number is higher than the previous tag's and the published appcast's. An untagged build only warns when the updater settings are missing. |
+| `macos/scripts/package_release.sh` | Re-signs inside-out with a secure timestamp, notarizes and staples app and DMG. Before signing, deletes `SUEnableAutomaticChecks` from the app (see [Updater](#updater)) and refuses an app any of whose code or `Info.plist` mentions `files.ghostty.org`. A `witty-v*` tag names the DMG `Witty-<version>-macos-<arch>.dmg`, is refused unless the app's version and a `CHANGELOG.md` section match it, its updater keys are right, and its build number is higher than the previous tag's and the published appcast's (the check `release.sh` makes, repeated for a repackaged app), and writes the signed `appcast.xml` next to the DMG after stapling. |
+| `macos/scripts/publish_release.sh` | Uploads a tag's DMG to its GitHub release, checks GitHub's copy against the local file, uploads `appcast.xml` last, and checks that the live feed serves it. |
+| `macos/scripts/lib_signing.sh`, `macos/scripts/test_lib_signing.sh` | Signing identity resolution, certificate expiry checks, notarization, the release tag, the release asset name, the tag/version/changelog check, and their tests. |
+| `macos/scripts/lib_update.sh`, `macos/scripts/test_lib_update.sh` | The tag build's updater checks, the Sparkle tools (from the release the Xcode project pins, checked by SHA-256), `generate_appcast` with one version and no deltas, `sign_update --verify` of the feed and the DMG, and their tests with stub tools, including runs of `release.sh` itself that must stop a bad tag build before it builds. |
+| `macos/scripts/release_checks.py`, `macos/scripts/test_release_checks.py` | The rules those scripts apply, in the Python standard library so their tests run on any OS: the feed URL and key, the six `CURRENT_PROJECT_VERSION` entries (`bump X.Y.Z` raises them), the built app's updater keys and the Ghostty update host, and the generated appcast. |
+| `macos/scripts/update_probe.py` | A loopback stand-in for the feed that prints what each check sends and fails if a request is not a GET or sends a query string, a body, a cookie the probe never set or one set during an earlier check; it redirects the first request, as github.com does, and reports a cookie sent back within one check. `--self-test` proves it catches each of the five and passes a client that clears cookies between checks. |
 | `src/build/GitVersion.zig` | Skips `witty-v*` tags when it detects the core's version. Upstream's `Config.zig` panics when the built commit carries any tag other than a `vX.Y.Z` matching `build.zig.zon`, so without this a tagged Witty release cannot be built. |
 | `macos/AGENTS.md` | Release prerequisites, pitfalls and settings. |
 | `AGENTS.md` | Upstream's file, with two Witty hunks: it points at the release script, and it replaces upstream's "Issue and PR Guidelines" section, which tells agents to refuse to open issues or PRs, with Witty's rule: never open issues, PRs or discussions on ghostty-org/ghostty, and open them on scamai/witty only when the user asks. Keep the hunks that small: upstream changed this file 11 times in the 12 months to 2026-10-24. |
-| `.gitignore` | Ignores the DMGs in `dist/`. |
+| `.gitignore` | Ignores the DMGs and `appcast.xml` that `release.sh` writes to `dist/`. |
 
 ### Repository automation
 

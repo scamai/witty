@@ -829,6 +829,11 @@ class AppDelegate: NSObject,
         // explicitly false (NO), auto-updates are disabled. Otherwise, we use the behavior
         // defined by our "auto-update" configuration (if set) or fall back to Sparkle
         // user-based defaults.
+        //
+        // Witty: as upstream's release workflow does, macos/scripts/package_release.sh
+        // deletes SUEnableAutomaticChecks from the released app's Info.plist, so with
+        // "auto-update" unset Sparkle asks on the second launch before it checks at all.
+        // Development builds keep it false and never check on their own.
         if !UpdateController.isConfigured {
             // Witty: the updater is off in this build; leave Sparkle alone.
         } else if Bundle.main.infoDictionary?["SUEnableAutomaticChecks"] as? Bool == false {

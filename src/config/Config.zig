@@ -4012,11 +4012,18 @@ term: []const u8 = "xterm-ghostty",
 ///  * `off` - Disable auto-updates.
 ///  * `check` - Check for updates and notify the user if an update is
 ///    available, but do not automatically download or install the update.
-///  * `download` - Check for updates, automatically download the update,
-///    notify the user, but do not automatically install the update.
+///  * `download` - Check for updates and download them automatically. A
+///    downloaded update installs when the app quits, without asking; to
+///    install it sooner, choose it from the update notification.
 ///
 /// If unset, we defer to Sparkle's default behavior, which respects the
-/// preference stored in the standard user defaults (`defaults(1)`).
+/// preference stored in the standard user defaults (`defaults(1)`). Release
+/// builds ask on their second launch whether to check automatically, and
+/// store the answer there. Setting `auto-update` counts as the answer, so
+/// Witty doesn't ask. Witty's first-launch import of a Ghostty config
+/// comments this setting out of the files it copies, so Witty asks for
+/// itself; a file both apps include by absolute or `~/` path is read as it
+/// is, and a value set there answers for Witty too.
 ///
 /// Changing this value at runtime works after a small delay.
 @"auto-update": ?AutoUpdate = null,

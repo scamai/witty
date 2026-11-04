@@ -71,8 +71,11 @@ tmux, plain Ghostty will serve you just as well.
    the Finder sidebar.
 
 Witty needs macOS 13 or later. Releases from v0.2.0 on are signed with Reality Inc.'s Developer
-ID and notarized by Apple. Witty doesn't update itself yet, and there is no Homebrew cask: new
-versions appear on the [Releases page](https://github.com/scamai/witty/releases), and on GitHub
+ID and notarized by Apple. Releases after v0.2.1 ask before their first automatic update check
+(unless your config sets `auto-update`, even in a file it shares with Ghostty), then check once a
+day if you allow it ([what a check sends](docs/witty-install.md#updates-and-privacy)); v0.2.0 and
+v0.2.1 never check, so install the next version by hand. There is no Homebrew cask: new versions
+appear on the [Releases page](https://github.com/scamai/witty/releases), and on GitHub
 **Watch → Custom → Releases** tells you when one is out.
 
 Coming from v0.1.x, whose zip contained an app named `Ghostty.app`? Follow
@@ -234,8 +237,8 @@ program gets the key's normal binding.
 exactly what it does in Ghostty.
 
 **How is Witty related to Ghostty?** Witty is a fork of the whole Ghostty app. It adds the
-`altscreen:` prefix, its own identity (name, icon, bundle ID, config folders and signature) and a
-few fixes not yet upstream, and it does not update itself. Everything else is Ghostty, merged from
+`altscreen:` prefix, its own identity (name, icon, bundle ID, config folders and signature), its
+own update feed and a few fixes not yet upstream. Everything else is Ghostty, merged from
 upstream regularly. [FORK.md](FORK.md) lists every difference, and the
 [changelog](CHANGELOG.md) names the Ghostty commit each sync brought in.
 
@@ -253,8 +256,20 @@ copy it). Ghostty's [documentation](https://ghostty.org/docs) applies to Witty's
 options and keybinds, except `altscreen:`, updates and installation. Where it says
 `~/.config/ghostty` or `com.mitchellh.ghostty`, Witty uses `~/.config/witty` and `ai.scam.witty`.
 
-**Who makes Witty?** Reality Inc. (scam.ai), as one of its open-source tools. Witty makes no
-update checks, crash reports stay on your machine, and all of the source is in this repository.
+**Who makes Witty?** Reality Inc. (scam.ai), as one of its open-source tools. Witty asks before its
+first automatic update check, on its second launch, unless your config sets `auto-update`. From this
+release on, when Witty copies your Ghostty config on first launch, it comments out `auto-update`
+lines so that it asks for itself; releases up to v0.2.1 copied them unchanged, so a line copied
+back then still counts (comment it out with **cmd+,** to be asked), and so does a line in a file
+both apps include by absolute or `~/` path. If you allow it, once a day Witty fetches a small public file (`appcast.xml`) from its
+GitHub Releases to check for a new version. It sends no install ID, system profile or terminal
+content; GitHub sees your IP address, the time and the request headers, including a user agent
+naming Witty and its version. Updates install only when you click, unless you turn on automatic
+installs (`auto-update = download`, or the **Automatically download and install updates** box in
+Sparkle's dialog): then a downloaded update installs when Witty quits. `auto-update = off` turns
+automatic checks off (**Check for Updates…** still works). 0.2.0 and 0.2.1 never check, so install the next one by hand; in 0.1.x, don't use Check
+for Updates, which asks Ghostty's server. Crash reports stay on your machine; all source is in this
+repository.
 
 **Linux or Windows?** Releases are macOS only. A Linux build from source is untested for Witty,
 has no `altscreen:` defaults, and shares Ghostty's app ID, so don't install it next to Ghostty

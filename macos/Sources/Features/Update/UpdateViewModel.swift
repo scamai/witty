@@ -331,8 +331,10 @@ enum UpdateState: Equatable {
 
             // Check for semantic version (x.y.z)
             if let semver = Self.extractSemanticVersion(from: version) {
-                let slug = semver.replacingOccurrences(of: ".", with: "-")
-                if let url = URL(string: "https://ghostty.org/docs/install/release-notes/\(slug)") {
+                // Witty: a Witty version's notes are its GitHub release, not Ghostty's
+                // release-notes page for the same number. Witty's feed lists only tagged
+                // releases, so the tip cases below never apply to it.
+                if let url = URL(string: "https://github.com/scamai/witty/releases/tag/witty-v\(semver)") {
                     self = .tagged(url)
                     return
                 }

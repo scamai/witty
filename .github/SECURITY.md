@@ -72,16 +72,28 @@ to us.
 - **The one-time Ghostty config import.** On first launch, if Witty has no config and Ghostty
   has one, Witty copies Ghostty's config files, their relative `config-file` includes and the
   `themes/` folder from `~/.config/ghostty` and `~/Library/Application Support/com.mitchellh.ghostty`
-  into its own folders. It must only read Ghostty's files, only write inside Witty's folders and
-  never overwrite a file. A way to make it read or write anywhere else is in scope.
+  into its own folders, commenting out their `auto-update` lines. It must only read Ghostty's
+  files, only write inside Witty's folders and never overwrite a file. A way to make it read or
+  write anywhere else is in scope.
 - **Release signing, notarization and the DMG.** From v0.2.0 on, releases ship as a DMG signed
   with Reality Inc.'s Developer ID and notarized by Apple, and the release notes give the DMG's
   SHA-256. Problems with how a release is built, signed or published, or a DMG whose hash does
   not match its release notes, are in scope.
-- **The updater, which is off.** Shipped builds set no update feed, so Witty's updater never
-  starts, Witty makes no update checks, and **Check for Updates…** is hidden. Current builds never
-  use Ghostty's update feed or update-signing key. A shipped build that checks for, downloads or
-  installs updates is in scope.
+- **The updater.** Releases after v0.2.1 ask before their first automatic check (unless the
+  config sets `auto-update`), then, if the user allows it, fetch `appcast.xml` from this
+  repository's GitHub Releases once a day. An `auto-update` line counts as the user's answer
+  even in a file the Witty and Ghostty configs both include by absolute or `~/` path, which
+  Witty reads as it is; that is intended, not a bypass. From this release on, the one-time
+  Ghostty config import comments out the `auto-update` lines in the files it copies; releases
+  up to v0.2.1 copied them unchanged, and such a line in an existing Witty config still counts
+  as the user's answer. A check must send no install
+  ID, system profile or terminal content and no cookie kept from an earlier check, and an update
+  must install only when the user clicks, or when Witty quits with `auto-update = download` or
+  after the user ticks **Automatically download and install updates** in Sparkle's dialog. The
+  appcast and each update are signed with Witty's own EdDSA key (`SURequireSignedFeed`,
+  `SUVerifyUpdateBeforeExtraction`). v0.2.0 and v0.2.1 set no update feed, so their updater
+  never starts. A way to make Witty install an update not signed with Witty's key, check
+  Ghostty's feed, send more than that request, or install without the user's choice is in scope.
 
 <!-- When scamai/homebrew-tap exists and has been tested on a Mac, add this
      bullet to the list above:
@@ -124,10 +136,13 @@ applied to Witty.
 
 ## Getting fixes
 
-Witty does not update itself yet. To hear about new releases, including security fixes, choose
-**Watch → Custom → Releases** on this repository, or subscribe to
-<https://github.com/scamai/witty/releases.atom>. To update, download the new DMG and replace
-Witty in your Applications folder.
+Releases after v0.2.1 ask before their first automatic update check (unless your config sets
+`auto-update`, which counts as your answer even in a file Witty and Ghostty both include), then
+check once a day if you allow it. A security fix can be marked critical, which removes its
+**Skip** button. v0.2.0 and v0.2.1 never check. To hear about new releases, including security
+fixes, choose **Watch → Custom → Releases** on this repository, or subscribe to
+<https://github.com/scamai/witty/releases.atom>. To update by hand, download the new DMG and
+replace Witty in your Applications folder.
 <!-- When scamai/homebrew-tap exists and has been tested on a Mac, add:
 Homebrew users: `brew upgrade --cask witty`.
 -->

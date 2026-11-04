@@ -159,7 +159,9 @@ All Witty-only files.
 
 | File | What and why |
 | --- | --- |
-| `.github/dependabot.yml` | Removed. In this repository Dependabot opened PRs that bump the actions in upstream's workflows. Witty takes those bumps with each upstream sync instead, so its copies of the workflows stay identical to upstream's. If a merge brings the file back or conflicts on it, keep it deleted. Dependabot's security alerts and security-update PRs do not need this file and stay on in the repository settings. |
+| `.github/dependabot.yml` | Removed. In this repository Dependabot opened PRs that bump the actions in upstream's workflows. Witty takes those bumps with each upstream sync instead, so its copies of upstream's workflows differ from upstream's only by the two guards below. If a merge brings the file back or conflicts on it, keep it deleted. Dependabot's security alerts and security-update PRs do not need this file and stay on in the repository settings. |
+| `.github/workflows/witty-macos.yml` | Witty-only: Witty's CI. On GitHub-hosted `macos-26` runners with Xcode 26.6 and the Zig that `build.zig.zon` names, it builds a Debug `Witty.app` for the runner's architecture, checks its bundle ID and that the updater is off, runs `zig build test` (the Zig unit tests, then the Swift tests) and reads the Swift test counts from the result bundle, and runs the four release-script tests. It runs for pull requests, and for pushes to `main` or a `ci/` branch, that change a file it lists, and uses no secrets: the app is signed ad hoc. Witty is public, so GitHub-hosted runners cost nothing here. |
+| `.github/workflows/test.yml`, `.github/workflows/release-tag.yml` | One `if:` each, marked `Witty:`, so that the `required` job of `test.yml` and the `setup` job of `release-tag.yml` run only in `ghostty-org/ghostty`. Every job in both files runs on Ghostty's Namespace runners (`namespace-profile-ghostty-*`), which this repository does not have, so a job that starts here waits for a runner until GitHub cancels it after 24 hours. Upstream already guards the other jobs of `test.yml`, directly or through `needs:` on a guarded job, but `required` escaped through `if: always()`: in the `Test` run of 2026-06-19 (`27838703787`) every other job was skipped and it alone was cancelled after 24 hours. `release-tag.yml` had no guard, so pushing one of upstream's `vX.Y.Z` tags here would have queued its `setup` job, which the other five need, for a runner that never comes. On a merge that changes these workflows, keep both guards and look for a new job that escapes them: one with no `needs:` and no guard, or one whose `if:` uses `always()`. |
 
 ### Fixes not upstream
 
@@ -252,12 +254,18 @@ upstream commits that touched each one in the 12 months to 2026-10-24:
 - **Upstream's release workflows** (`.github/workflows/release-tag.yml`,
   `release-tip.yml`, `publish-tag.yml`). They publish Ghostty's own builds and
   do not run for Witty: `release-tag.yml` fires on `v1.2.3`-style tags, not
-  `witty-v*`; `release-tip.yml` runs only in `ghostty-org`; `publish-tag.yml`
-  is manual.
+  `witty-v*`, and its one Witty hunk (see
+  [Repository automation](#repository-automation)) keeps it from starting even
+  for those; `release-tip.yml` starts after a `Test` run on `main`, and then
+  its `setup` job, which every other job needs, runs only in `ghostty-org`;
+  `release-tip.yml` started by hand and `publish-tag.yml`, which is manual,
+  would still wait for runners here.
 - **Upstream's community workflows** (`vouch-*.yml`, `milestone.yml`). The
   files stay as upstream has them, but the workflows are disabled in this
   repository's Actions settings (2026-10-18): they run on Ghostty's own runners
   with Ghostty's app secrets, so here every issue, comment or PR left a run
   queued that never started. `test.yml` has been disabled the same way since
-  2026-06-19; its jobs only run in `ghostty-org` anyway. Re-enable one with
-  `gh workflow enable <file> -R scamai/witty`.
+  2026-06-19, when each of its runs here waited 24 hours for a runner and was
+  cancelled. With its `Witty:` guard none of its jobs starts here, so enabling
+  it would only add a skipped run to every push; `witty-macos.yml` is Witty's
+  CI instead. Re-enable one with `gh workflow enable <file> -R scamai/witty`.

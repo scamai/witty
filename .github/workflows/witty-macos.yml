@@ -1,0 +1,178 @@
+# Witty's own macOS CI. Upstream's test.yml needs Ghostty's Namespace
+# runners, which this repository does not have (see FORK.md, "Repository
+# automation"), so this workflow builds the app and runs the tests on
+# GitHub-hosted macOS runners instead. It uses no secrets and signs nothing:
+# the app is signed ad hoc, as in a local build, and its updater stays off.
+name: Witty macOS
+
+on:
+  pull_request:
+    # The files the macOS build reads, plus this workflow.
+    paths: &code
+      - ".github/workflows/witty-macos.yml"
+      - "build.zig"
+      - "build.zig.zon"
+      - "dist/**"
+      - "images/**"
+      - "include/**"
+      - "macos/**"
+      - "pkg/**"
+      - "po/**"
+      - "src/**"
+      - "vendor/**"
+  push:
+    branches:
+      - main
+      # A push to a ci/ branch runs this workflow too, so a change to it can
+      # be tried without opening a pull request.
+      - "ci/**"
+    paths: *code
+  workflow_dispatch: {}
+
+# A newer push to the same branch or pull request cancels the older run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  release-scripts:
+    name: Release-script tests
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # test_lib_signing.sh needs OpenSSL 3.4 or later to make an expired
+      # certificate. /usr/bin/openssl is LibreSSL, which cannot.
+      - name: Put Homebrew's OpenSSL first on PATH
+        run: echo "$(brew --prefix openssl@3)/bin" >> "$GITHUB_PATH"
+
+      - name: Tool versions
+        run: |
+          openssl version
+          bash --version | head -n 1
+          python3 --version
+
+      - name: test_lib_signing.sh
+        run: macos/scripts/test_lib_signing.sh
+
+      - name: test_lib_update.sh
+        run: macos/scripts/test_lib_update.sh
+
+      - name: test_release_checks.py
+        run: python3 macos/scripts/test_release_checks.py
+
+      - name: update_probe.py --self-test
+        run: python3 macos/scripts/update_probe.py --self-test
+
+  app:
+    name: Build and test the app
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The Xcode upstream's macOS jobs select. HACKING.md: the app needs
+      # Xcode 26 and the macOS 26 SDK.
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app
+          xcodebuild -version
+
+      # Xcode 26 installs the Metal toolchain as a separate component, and
+      # the hosted image does not always have it
+      # (https://github.com/actions/runner-images/issues/13014).
+      - name: Metal toolchain
+        run: |
+          if ! xcrun -sdk macosx metal --version >/dev/null 2>&1; then
+            xcodebuild -downloadComponent MetalToolchain
+          fi
+          xcrun -sdk macosx metal --version
+
+      # The build compiles the translations with gettext's msgfmt.
+      - name: gettext
+        run: |
+          command -v msgfmt >/dev/null || brew install gettext
+          msgfmt --version | head -n 1
+
+      # With no version given, setup-zig installs minimum_zig_version from
+      # build.zig.zon and checks its signature. It also caches Zig's global
+      # cache, into which it moves the local cache, between runs.
+      - name: Install Zig
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
+        with:
+          cache-size-limit: 6144
+
+      - name: Zig version and free disk
+        run: |
+          zig version
+          df -h "$GITHUB_WORKSPACE"
+
+      # The macOS build of a pull request: a Debug app for this Mac's
+      # architecture, at macos/build/Debug/Witty.app. Releases are universal
+      # ReleaseFast builds made by macos/scripts/release.sh on the release Mac.
+      - name: Build Witty.app
+        run: zig build -Demit-macos-app -Dxcframework-target=native
+
+      - name: Check the app bundle
+        run: |
+          plist=macos/build/Debug/Witty.app/Contents/Info.plist
+          test -x macos/build/Debug/Witty.app/Contents/MacOS/ghostty
+          for key in CFBundleIdentifier CFBundleShortVersionString CFBundleVersion; do
+            printf '%s = %s\n' "$key" "$(plutil -extract "$key" raw "$plist")"
+          done
+          # Witty's own Debug bundle ID (FORK.md, "Witty's own identity").
+          id=$(plutil -extract CFBundleIdentifier raw "$plist")
+          if [ "$id" != "ai.scam.witty.debug" ]; then
+            echo "::error::CFBundleIdentifier is '$id', expected ai.scam.witty.debug"
+            exit 1
+          fi
+          # No feed and no key were given, so the updater must be off.
+          for key in SUFeedURL SUPublicEDKey; do
+            value=$(plutil -extract "$key" raw "$plist" 2>/dev/null || true)
+            if [ -n "$value" ]; then
+              echo "::error::$key is '$value'; a build without updater settings must leave it empty"
+              exit 1
+            fi
+          done
+
+      # Without -Dtest-filter, `zig build test` runs the Zig unit tests and
+      # then the Swift tests through `xcodebuild test` (macos/AGENTS.md).
+      - name: Zig and Swift tests
+        id: tests
+        run: zig build test --summary all
+
+      # `zig build test` shows xcodebuild's output only when it fails, so read
+      # the counts from the result bundle. No bundle, or no test in it, means
+      # the Swift tests did not run, which fails this step.
+      - name: Swift test results
+        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
+        run: |
+          shopt -s nullglob
+          bundles=("$HOME"/Library/Developer/Xcode/DerivedData/*/Logs/Test/*.xcresult)
+          if [ "${#bundles[@]}" -eq 0 ]; then
+            echo "::error::No .xcresult bundle: the Swift tests did not run"
+            exit 1
+          fi
+          printf '%s\n' "${bundles[@]}"
+          # Bundle names end in the date and time, so the last is the newest.
+          bundle=${bundles[${#bundles[@]}-1]}
+          xcrun xcresulttool get test-results summary --path "$bundle" > summary.json
+          python3 - summary.json <<'EOF'
+          import json, sys
+          s = json.load(open(sys.argv[1]))
+          keys = ("result", "totalTestCount", "passedTests", "failedTests", "skippedTests", "expectedFailures")
+          for k in keys:
+              print(f"{k}: {s.get(k)}")
+          for f in s.get("testFailures", []):
+              print(f"FAILED {f.get('testIdentifierString')}: {f.get('failureText')}")
+          if not s.get("totalTestCount") or s.get("failedTests"):
+              sys.exit(1)
+          EOF

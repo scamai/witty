@@ -45,11 +45,13 @@ is run. This table says which ones govern Witty.
 | [`AI_POLICY.md`](../AI_POLICY.md)                                                                                      | No, except for work you send to Ghostty | Ghostty's AI rules. Witty's are under [AI-assisted contributions](#ai-assisted-contributions).                                                                                       |
 | [`CODEOWNERS`](../CODEOWNERS) at the root                                                                              | No                                      | Ghostty's maintainers. Witty's code owners are in [`.github/CODEOWNERS`](CODEOWNERS).                                                                                                |
 | [`PACKAGING.md`](../PACKAGING.md)                                                                                      | No                                      | Ghostty's source tarballs and distro packaging.                                                                                                                                      |
-| [`.github/VOUCHED.td`](VOUCHED.td), [`.github/DISCUSSION_TEMPLATE/`](DISCUSSION_TEMPLATE)                              | No                                      | Ghostty's vouch list and discussion forms. Neither is used here.                                                                                                                     |
+| [`.github/VOUCHED.td`](VOUCHED.td), [`DISCUSSION_TEMPLATE/vouch-request.yml`](DISCUSSION_TEMPLATE/vouch-request.yml)   | No                                      | Ghostty's vouch list and vouch request form. Neither is used here.                                                                                                                   |
+| [`.github/DISCUSSION_TEMPLATE/issue-triage.yml`](DISCUSSION_TEMPLATE/issue-triage.yml)                                 | No                                      | Ghostty's Issue Triage form with Witty's privacy advice ([FORK.md](../FORK.md#community-files)). Not used: this repository has no Issue Triage discussion category.                  |
 | [`po/README_CONTRIBUTORS.md`](../po/README_CONTRIBUTORS.md), [`po/README_TRANSLATORS.md`](../po/README_TRANSLATORS.md) | No                                      | Ghostty's translation process.                                                                                                                                                       |
 
-The files marked "No" are identical to upstream's, so that upstream merges
-stay clean. Please don't edit them in a Witty pull request.
+The files marked "No" are identical to upstream's, except for the two Witty
+hunks in `issue-triage.yml`, so that upstream merges stay clean. Please don't
+edit them in a Witty pull request.
 
 ## Witty or Ghostty?
 

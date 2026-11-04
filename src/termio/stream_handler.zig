@@ -419,7 +419,15 @@ pub const StreamHandler = struct {
                 // If tmux control mode is disabled at the build level,
                 // then this whole block shouldn't be analyzed.
                 if (comptime !tmux_enabled) break :tmux;
-                log.info("tmux control mode event cmd={f}", .{tmux});
+
+                // Witty: the three tmux logs in this block are debug, not
+                // upstream's info. Notifications and viewer actions carry pane
+                // output, command output and capture-pane commands, and macOS
+                // unified logging (on by default) records the Zig core's
+                // messages as public strings. Release builds compile debug
+                // logs out (std_options in main_ghostty.zig). See FORK.md,
+                // "Fixes not upstream".
+                log.debug("tmux control mode event cmd={f}", .{tmux});
 
                 switch (tmux) {
                     .enter => {
@@ -455,7 +463,8 @@ pub const StreamHandler = struct {
                 const viewer = self.tmux_viewer orelse {
                     // This can only really happen if we failed to
                     // initialize the viewer on enter.
-                    log.info(
+                    // Witty: debug, not info (see above).
+                    log.debug(
                         "received tmux control mode command without viewer: {f}",
                         .{tmux},
                     );
@@ -464,7 +473,8 @@ pub const StreamHandler = struct {
                 };
 
                 for (viewer.next(.{ .tmux = tmux })) |action| {
-                    log.info("tmux viewer action={f}", .{action});
+                    // Witty: debug, not info (see above).
+                    log.debug("tmux viewer action={f}", .{action});
                     switch (action) {
                         .exit => {
                             // We ignore this because we will fully exit when

@@ -171,6 +171,7 @@ All Witty-only files.
 | `src/terminal/stream_terminal.zig` | Test for that reset sequence. |
 | `macos/Sources/Ghostty/Ghostty.App.swift` | Handles `size_limit` and `quit_timer` explicitly, so they no longer log "unknown action" on every new tab. |
 | `macos/Tests/Ghostty/ActionDispatchCoverageTests.swift` | Fails if a core action that is sent unprompted falls into the dispatcher's `default:` branch. |
+| `src/termio/stream_handler.zig` | Logs tmux control-mode notifications and viewer actions at debug instead of upstream's info (the three `log` calls in `dcsCommand`). They carry pane output, command output and the `capture-pane` commands sent to tmux, and the Zig core's macOS unified logging is on by default and logs every message as a public string (`pkg/macos/os/zig_macos.c`), so at info a release build wrote them to the system log unredacted. Release builds compile debug logs out (`std_options` in `src/main_ghostty.zig`); Debug builds still log them. On a conflict, keep `log.debug`. |
 
 ### Documentation
 
@@ -198,8 +199,9 @@ otherwise, upstream has never had a file at a path listed here.
 | `.github/CODEOWNERS` | `* @shenxingy`. GitHub uses the first `CODEOWNERS` it finds in `.github/`, the root and `docs/`, so this replaces upstream's root file, whose `@ghostty-org` teams are unknown in this repository. |
 | `.github/PULL_REQUEST_TEMPLATE.md` | The fork checklist (`Witty:` comments, FORK.md rows, compatibility identifiers, CHANGELOG) and the AI disclosure for pull requests. |
 | `.github/SECURITY.md`, `.github/SUPPORT.md`, `.github/CODE_OF_CONDUCT.md` | Witty's own. For this repository they replace the `scamai/.github` organization defaults (GitHub uses the repository's own file first). Upstream has no file at these paths. `CODE_OF_CONDUCT.md` is the Contributor Covenant 2.1 with only the contact filled in. Keep the rest verbatim so GitHub keeps detecting it. |
-| `.github/ISSUE_TEMPLATE/config.yml` | Witty's issue chooser: blank issues off, links to Q&A, Ghostty's Issue Triage discussions, Ghostty's docs and the security policy. Upstream deleted its own `config.yml` in `4a516fa39`; if a merge re-adds it, keep Witty's version. |
+| `.github/ISSUE_TEMPLATE/config.yml` | Witty's issue chooser: blank issues off, links to Q&A, Witty's bug form for bugs that also happen in stock Ghostty, Ghostty's docs and the security policy. It links no Ghostty form: Ghostty's Issue Triage form asks for screen recordings, a screenshot of the inspector's key log and logs, in public. Witty's bug form still links that form for bugs that also happen in stock Ghostty, next to a note to redact first and send anything private to Witty's private channel. Upstream deleted its own `config.yml` in `4a516fa39`; if a merge re-adds it, keep Witty's version. |
 | `.github/ISSUE_TEMPLATE/witty-bug.yml`, `.github/ISSUE_TEMPLATE/witty-feature.yml` | Witty's own issue forms. The `witty-` prefix keeps them from colliding with any template upstream adds. |
+| `.github/DISCUSSION_TEMPLATE/issue-triage.yml` | Upstream's Issue Triage discussion form with two Witty hunks, marked `# Witty:`: the recommendations in the Issue Description field, and the logs field. Upstream's ask for an asciinema cast, a screenshot of the inspector's key log, a Sentry UUID and logs; Witty's ask for a minimal script or shell snippet with secrets removed, warn that the key log also shows a password typed while the inspector is open, point at Witty's log commands, and send crash files and anything private to the private channel in `.github/SECURITY.md`. The rest of the form is upstream's. This repository has no Issue Triage discussion category (on 2026-11-04 it had Announcements, Q&A and Show and tell), so GitHub shows the form only if one is added. On a conflict, keep Witty's hunks. |
 
 **Never edit these upstream files.** They describe how Ghostty is run, and
 Witty keeps them identical to upstream's so that merges stay clean;
@@ -207,7 +209,7 @@ Witty keeps them identical to upstream's so that merges stay clean;
 upstream commits that touched each one in the 12 months to 2026-10-24:
 `.github/VOUCHED.td` (348), `CONTRIBUTING.md` (26), `CODEOWNERS` (17),
 `po/README_TRANSLATORS.md` (12), `HACKING.md` (11),
-`.github/DISCUSSION_TEMPLATE/` (4), `PACKAGING.md` (3), `AI_POLICY.md` (2),
+`.github/DISCUSSION_TEMPLATE/vouch-request.yml` (3), `PACKAGING.md` (3), `AI_POLICY.md` (2),
 `po/README_CONTRIBUTORS.md` (2), `.github/issue-unvouched-message` (1).
 
 ## Deliberately not changed

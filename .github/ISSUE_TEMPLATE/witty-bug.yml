@@ -15,7 +15,7 @@ body:
     attributes:
       label: Does this also happen in stock Ghostty?
       description: |
-        If it does, it most likely belongs to Ghostty: please report it there as an [Issue Triage discussion](https://github.com/ghostty-org/ghostty/discussions/new?category=issue-triage), with steps that use Ghostty only, so every Ghostty user gets the fix and Witty picks it up at its next upstream sync. You can file it here too, and we'll label it `upstream`: Witty sometimes carries a fix before Ghostty does ([FORK.md, "Fixes not upstream"](https://github.com/scamai/witty/blob/main/FORK.md#fixes-not-upstream)). Stock Ghostty has no `altscreen:` prefix, so for an `altscreen:` key or the tmux signal, choose "No, only in Witty".
+        If it does, it most likely belongs to Ghostty: please report it there as an [Issue Triage discussion](https://github.com/ghostty-org/ghostty/discussions/new?category=issue-triage), with steps that use Ghostty only, so every Ghostty user gets the fix and Witty picks it up at its next upstream sync. Ghostty's discussions are public, and its form asks for screen recordings, a screenshot of the inspector's key log and logs, so crop or redact them before you post. Anything that can't be made public goes to Witty privately: use **Report a vulnerability** on Witty's Security tab (<https://github.com/scamai/witty/security/advisories/new>), or email contact@scam.ai with `[Witty]` in the subject. You can file it here too, and we'll label it `upstream`: Witty sometimes carries a fix before Ghostty does ([FORK.md, "Fixes not upstream"](https://github.com/scamai/witty/blob/main/FORK.md#fixes-not-upstream)). Stock Ghostty has no `altscreen:` prefix, so for an `altscreen:` key or the tmux signal, choose "No, only in Witty".
       options:
         - "No, only in Witty"
         - "I haven't tried stock Ghostty"
@@ -55,6 +55,8 @@ body:
       label: What happened, and what did you expect?
       description: |
         The steps, what you expected, and what happened instead. Screenshots or a short screen recording help; drag them in.
+
+        Issues are public, so crop or redact a screenshot or recording before you add it: other windows, hostnames, paths, command output and anything you typed. If something that shows the problem can't be made public, send it privately instead: use **Report a vulnerability** on Witty's Security tab (<https://github.com/scamai/witty/security/advisories/new>), or email contact@scam.ai with `[Witty]` in the subject.
       placeholder: |
         1. ssh myhost -t 'tmux new -A -s main'
         2. Split the tmux window twice: C-b %, then C-b % again (the panes are now 1/2, 1/4 and 1/4)
@@ -99,4 +101,6 @@ body:
     attributes:
       label: Crash report
       description: |
-        If Witty crashed: crash reports stay on your Mac, in `~/.local/state/witty/crash` (or `$XDG_STATE_HOME/witty/crash` if you set `XDG_STATE_HOME`), and are not sent anywhere. `/Applications/Witty.app/Contents/MacOS/ghostty +crash-report` lists them. GitHub doesn't accept the `.ghosttycrash` file type, so zip the file and drag the zip here. Attach only what you're comfortable making public.
+        If Witty crashed: crash reports stay on your Mac, in `~/.local/state/witty/crash` (or `$XDG_STATE_HOME/witty/crash` if you set `XDG_STATE_HOME`), and are not sent anywhere. `/Applications/Witty.app/Contents/MacOS/ghostty +crash-report` lists them.
+
+        Please don't upload a crash file here: issues are public. A crash file holds a memory dump of Witty at the moment it crashed, which may include text that was on screen, file paths, and environment variables with any tokens or passwords they hold. Send it privately instead: email it to contact@scam.ai with `[Witty]` in the subject, or use **Report a vulnerability** on Witty's Security tab (<https://github.com/scamai/witty/security/advisories/new>), say that you have a crash file, and we'll reply there. In this field, give the crash file's name (a random ID ending in `.ghosttycrash`, as `+crash-report` lists it) and say how you sent it.

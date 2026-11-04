@@ -220,7 +220,10 @@ file that upstream also changes, read the [merge rules](../FORK.md#merge-rules)
 in FORK.md.
 
 Upstream's `test.yml` workflow is disabled in this repository (its jobs only
-run in `ghostty-org`), so run the tests locally before opening a pull request.
+run in `ghostty-org`). Witty's own workflow,
+[`witty-macos.yml`](../.github/workflows/witty-macos.yml), builds the app and
+runs the tests on a GitHub-hosted Mac for each pull request that changes the
+code. Running the tests locally first is still faster.
 
 ---
 

@@ -241,10 +241,13 @@ macos/build/Debug/Witty.app/Contents/MacOS/ghostty +crash-report   # a debug bui
 4. **Say how you tested it**, including your macOS version and Mac if you
    tested on one. The [pull request template](PULL_REQUEST_TEMPLATE.md) has
    the checklist.
-5. **Run [Witty's tests](#wittys-own-tests) yourself.** Today the only
-   automatic check on a pull request is the Nix job inherited from upstream,
-   which always reports "skipped". A maintainer builds and tests each pull
-   request locally.
+5. **Run [Witty's tests](#wittys-own-tests) yourself.** On a pull request
+   that changes the code, the `Witty macOS` workflow
+   ([`.github/workflows/witty-macos.yml`](workflows/witty-macos.yml)) builds
+   the app on a GitHub-hosted Mac and runs the whole `zig build test` suite
+   (the Zig and Swift tests) and the release-script tests. The Nix job
+   inherited from upstream always reports "skipped". A maintainer builds and
+   tests each pull request locally.
 
 The maintainers do the upstream merges, so please don't open a pull request
 that merges upstream Ghostty.

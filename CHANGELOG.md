@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **tmux control-mode notifications and viewer actions stay out of the macOS
+  system log, and the report forms say what is public.** Release builds
+  logged each tmux control-mode notification and viewer action (`tmux -CC`),
+  which carry pane output and command output, at info level, and macOS
+  unified logging recorded them unredacted. They are now debug logs, which
+  release builds leave out. Release builds still log two kinds of tmux
+  control-mode text at warn level, as upstream does: the output of a command
+  that tmux answers with an error, and a notification line the parser cannot
+  match, in full. The bug form now says that issues are public, asks you to
+  crop or redact screenshots and recordings, and says what a crash file holds:
+  a memory dump that may include on-screen text, file paths and environment
+  variables. Crash files and anything else private go to Witty privately,
+  through **Report a vulnerability** on the Security tab or by email to
+  contact@scam.ai with `[Witty]` in the subject, not into a public issue. The
+  issue chooser links Witty's bug form instead of Ghostty's Issue Triage form,
+  and Witty's copy of that form no longer asks for an asciinema cast or a
+  Sentry UUID.
+
 ## [witty-v0.3.0] — 2026-11-03
 
 ### Added

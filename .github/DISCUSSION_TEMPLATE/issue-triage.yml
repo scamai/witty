@@ -8,23 +8,28 @@ body:
   - type: markdown
     attributes:
       value: "# Issue Details"
+  # Witty: the recommendations in this description are Witty's, not
+  # upstream's, and so is the logs field below. Discussions are public, so
+  # they ask for no asciinema cast and no Sentry UUID, warn before a
+  # key-log screenshot, and send crash files and anything private to
+  # Witty's private channel (FORK.md, "Community files").
   - type: textarea
     attributes:
       label: Issue Description
       description: |
         Provide a detailed description of the issue.  Include relevant information, such as:
         - The feature or configuration option you encounter the issue with.
-        - Screenshots, screen recordings, or other supporting media (as needed).
+        - Screenshots, screen recordings, or other supporting media (as needed). Discussions are public, so crop or redact them first.
         - If this is a regression of an existing issue that was closed or resolved, please include the previous item reference (Discussion, Issue, PR, commit) in your description.
 
         > [!TIP]
         > **Not sure what information to include?**
-        > Here are some recommendations:
-        > - **Input issues:** include your keyboard layout, a screenshot of logged keystrokes from the terminal inspector's "Keyboard" tab (Linux: <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>i</kbd>; MacOS: <kbd>cmd</kbd>+<kbd>alt</kbd>+<kbd>i</kbd>), input method, Linux input method engine (IBus, Fcitx 5, or none) and its version.
-        > - **Font issues:** include the problematic character(s), the output of `ghostty +show-face` for these character(s), and if they work in other applications.
-        > - **Terminal emulation issues (including image rendering issues):** attach an [asciinema](https://docs.asciinema.org/getting-started/) cast file, shell script, or text file for reproduction.
-        > - **Renderer issues:** (Linux) include your OpenGL version, graphics card, driver version.
-        > - **Crashes:** (macOS) include the [Sentry UUID](https://github.com/ghostty-org/ghostty?tab=readme-ov-file#crash-reports); (Linux) try to reproduce using a debug build and provide the stack trace.
+        > Here are some recommendations. Remove secrets, hostnames and private paths from anything you paste. Anything you can't make public goes to Witty privately: use **Report a vulnerability** on Witty's Security tab (<https://github.com/scamai/witty/security/advisories/new>), or email contact@scam.ai with `[Witty]` in the subject.
+        > - **Input issues:** include your keyboard layout, your input method, and the keys you pressed. For a screenshot of the terminal inspector's "Keyboard" tab (<kbd>cmd</kbd>+<kbd>alt</kbd>+<kbd>i</kbd>), open the inspector just before you press those keys: the tab lists the last 50 keys pressed while it is open, so it would also show a password typed then.
+        > - **Font issues:** include the problematic character(s), the output of `/Applications/Witty.app/Contents/MacOS/ghostty +show-face` for these character(s), and if they work in other applications.
+        > - **Terminal emulation issues (including image rendering issues):** include a minimal script or shell snippet that reproduces the issue, with any secrets removed. Please don't attach a recording of your terminal session: it holds everything you typed and everything the programs printed.
+        > - **Renderer issues:** include your Mac's model and chip.
+        > - **Crashes:** don't attach the crash file. Witty's crash files stay on your Mac (`/Applications/Witty.app/Contents/MacOS/ghostty +crash-report` lists them) and hold a memory dump that may include text that was on screen, file paths and environment variables. Send one privately, as above, and give its name here. There is no Sentry UUID to include: Witty sends no crash reports.
       placeholder: |
         When using SSH to connect to my remote Linux machine from my local macOS device in Ghostty, I try to run `clear`, and the screen does not clear.  Instead, I see the following error message printed to the terminal: `Error opening terminal: xterm-ghostty.`
     validations:
@@ -59,11 +64,12 @@ body:
         4. Observe `xterm-ghostty` error message above.
     validations:
       required: true
+  # Witty: Witty's log advice (see the note above Issue Description).
   - type: textarea
     attributes:
-      label: Ghostty Logs
+      label: Witty Logs
       description: |
-        Provide any captured Ghostty logs or stacktraces during your issue reproduction in this field.  On Linux, logs can be found by running `ghostty` from the command-line; on macOS, logs can be viewed with `sudo log stream --level debug --predicate 'subsystem=="com.mitchellh.ghostty"'` from another terminal emulator.
+        Paste only the log lines from while you reproduced the issue, after reading them: logs can contain file paths, hostnames and text that programs printed, so remove anything private first. [Witty's contributing guide](https://github.com/scamai/witty/blob/main/.github/CONTRIBUTING.md#logs-and-crash-reports) gives the `log stream` commands that show Witty's logs; run them from another terminal app.
       render: text
   - type: textarea
     attributes:

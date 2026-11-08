@@ -22,8 +22,11 @@ on:
       - "vendor/**"
   push:
     branches:
-      - main
-      # A push to a ci/ branch runs this workflow too, so a change to it can
+      # Not main: every change reaches main through a pull request, whose run
+      # has already built and tested the same tree, and the push run repeated
+      # it twenty seconds later for about $1.50 of macOS time each (the two
+      # runs were 95 % of this repository's November 2026 Actions bill). A
+      # push to a ci/ branch still runs this workflow, so a change to it can
       # be tried without opening a pull request.
       - "ci/**"
     paths: *code

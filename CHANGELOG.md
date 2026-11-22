@@ -28,6 +28,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   and Witty's copy of that form no longer asks for an asciinema cast or a
   Sentry UUID.
 
+### Internal
+
+- **CI runs on Witty's own Mac, never on a GitHub-hosted one.** The
+  `Witty macOS` workflow builds and tests the app on a self-hosted Mac in the
+  organization's `macserver-public` runner group, for pushes to `main` and
+  for runs started by hand from `main`; pull requests no longer get a CI run,
+  and a maintainer tests each one locally. The result step now reads only the
+  result bundle that run wrote, since the Mac keeps DerivedData between runs.
+  Upstream's remaining workflows (`nix.yml`, `release-tag.yml`,
+  `release-tip.yml`, `publish-tag.yml`, `snap.yml`, `flatpak.yml`,
+  `update-colorschemes.yml`, `clean-artifacts.yml`) are disabled in the
+  repository's Actions settings, as `test.yml` and the community workflows
+  already were (FORK.md, "Deliberately not changed").
+
 ## [witty-v0.3.0] — 2026-11-03
 
 ### Added

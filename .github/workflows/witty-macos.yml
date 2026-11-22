@@ -1,14 +1,25 @@
 # Witty's own macOS CI. Upstream's test.yml needs Ghostty's Namespace
 # runners, which this repository does not have (see FORK.md, "Repository
-# automation"), so this workflow builds the app and runs the tests on
-# GitHub-hosted macOS runners instead. It uses no secrets and signs nothing:
-# the app is signed ad hoc, as in a local build, and its updater stays off.
+# automation"), so this workflow builds the app and runs the tests on Scam.ai's
+# own Mac instead: a self-hosted runner in the organization's
+# `macserver-public` runner group. It never runs on a GitHub-hosted Mac. It
+# uses no secrets and signs nothing: the app is signed ad hoc, as in a local
+# build, and its updater stays off.
+#
+# It runs for pushes to main and when started by hand from main, never for a
+# pull request. The runner group takes this file only as it is on
+# refs/heads/main, so a run from a pull request or any other branch would wait
+# for a runner that never comes, and a pull request from a fork must never
+# reach a self-hosted runner. Contributors run the tests locally
+# (.github/CONTRIBUTING.md, "Witty's own tests").
 name: Witty macOS
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
     # The files the macOS build reads, plus this workflow.
-    paths: &code
+    paths:
       - ".github/workflows/witty-macos.yml"
       - "build.zig"
       - "build.zig.zon"
@@ -20,18 +31,11 @@ on:
       - "po/**"
       - "src/**"
       - "vendor/**"
-  push:
-    branches:
-      - main
-      # A push to a ci/ branch runs this workflow too, so a change to it can
-      # be tried without opening a pull request.
-      - "ci/**"
-    paths: *code
   workflow_dispatch: {}
 
-# A newer push to the same branch or pull request cancels the older run.
+# A newer push to main cancels the older run.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -40,12 +44,20 @@ permissions:
 jobs:
   release-scripts:
     name: Release-script tests
-    runs-on: macos-26
+    # Started by hand from another branch, the job is skipped rather than left
+    # waiting for a runner that will not take it.
+    if: github.repository == 'scamai/witty' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macOS, macserver-public]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      # Homebrew's tools (openssl@3, gettext) live in /opt/homebrew on Apple
+      # silicon; make sure the runner's PATH has it.
+      - name: Homebrew on PATH
+        run: command -v brew >/dev/null || echo /opt/homebrew/bin >> "$GITHUB_PATH"
 
       # test_lib_signing.sh needs OpenSSL 3.4 or later to make an expired
       # certificate. /usr/bin/openssl is LibreSSL, which cannot.
@@ -72,23 +84,39 @@ jobs:
 
   app:
     name: Build and test the app
-    runs-on: macos-26
+    # Started by hand from another branch, the job is skipped rather than left
+    # waiting for a runner that will not take it.
+    if: github.repository == 'scamai/witty' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macOS, macserver-public]
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      # The Xcode upstream's macOS jobs select. HACKING.md: the app needs
-      # Xcode 26 and the macOS 26 SDK.
-      - name: Select Xcode 26.6
-        run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app
-          xcodebuild -version
+      # Homebrew's tools (openssl@3, gettext) live in /opt/homebrew on Apple
+      # silicon; make sure the runner's PATH has it.
+      - name: Homebrew on PATH
+        run: command -v brew >/dev/null || echo /opt/homebrew/bin >> "$GITHUB_PATH"
 
-      # Xcode 26 installs the Metal toolchain as a separate component, and
-      # the hosted image does not always have it
-      # (https://github.com/actions/runner-images/issues/13014).
+      # HACKING.md: the app needs Xcode 26 and the macOS 26 SDK. The runner
+      # has no sudo, so it cannot switch Xcode, and DEVELOPER_DIR would not
+      # help: the build hands xcodebuild an empty environment
+      # (src/build/GhosttyXcodebuild.zig). The Mac's selected Xcode must
+      # therefore be Xcode 26.
+      - name: Xcode 26
+        run: |
+          xcode-select -p
+          xcodebuild -version
+          if ! xcodebuild -version | head -n 1 | grep -q '^Xcode 26\.'; then
+            echo "::error::The selected Xcode is not Xcode 26; select one with xcode-select on the runner's Mac"
+            exit 1
+          fi
+
+      # Xcode 26 installs the Metal toolchain as a separate component, which
+      # a Mac does not always have
+      # (https://github.com/actions/runner-images/issues/13014). The first
+      # run on a Mac without it downloads it; later runs find it.
       - name: Metal toolchain
         run: |
           if ! xcrun -sdk macosx metal --version >/dev/null 2>&1; then
@@ -115,7 +143,7 @@ jobs:
           zig version
           df -h "$GITHUB_WORKSPACE"
 
-      # The macOS build of a pull request: a Debug app for this Mac's
+      # The macOS build of a change: a Debug app for this Mac's
       # architecture, at macos/build/Debug/Witty.app. Releases are universal
       # ReleaseFast builds made by macos/scripts/release.sh on the release Mac.
       - name: Build Witty.app
@@ -147,27 +175,47 @@ jobs:
       # then the Swift tests through `xcodebuild test` (macos/AGENTS.md).
       - name: Zig and Swift tests
         id: tests
-        run: zig build test --summary all
+        run: |
+          touch "$RUNNER_TEMP/witty-tests-started"
+          zig build test --summary all
 
       # `zig build test` shows xcodebuild's output only when it fails, so read
       # the counts from the result bundle. No bundle, or no test in it, means
-      # the Swift tests did not run, which fails this step.
+      # the Swift tests did not run, which fails this step. The runner's Mac
+      # keeps DerivedData between runs and holds other projects' bundles, so
+      # only a bundle written after the tests started, in a DerivedData folder
+      # named Ghostty-* that does not belong to another checkout, counts.
       - name: Swift test results
         if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
         run: |
-          shopt -s nullglob
-          bundles=("$HOME"/Library/Developer/Xcode/DerivedData/*/Logs/Test/*.xcresult)
-          if [ "${#bundles[@]}" -eq 0 ]; then
-            echo "::error::No .xcresult bundle: the Swift tests did not run"
-            exit 1
-          fi
-          printf '%s\n' "${bundles[@]}"
-          # Bundle names end in the date and time, so the last is the newest.
-          bundle=${bundles[${#bundles[@]}-1]}
-          xcrun xcresulttool get test-results summary --path "$bundle" > summary.json
-          python3 - summary.json <<'EOF'
-          import json, sys
-          s = json.load(open(sys.argv[1]))
+          python3 - "$HOME/Library/Developer/Xcode/DerivedData" \
+            "$GITHUB_WORKSPACE/macos/Ghostty.xcodeproj" \
+            "$RUNNER_TEMP/witty-tests-started" <<'EOF'
+          import glob, json, os, plistlib, subprocess, sys
+          derived, project, started = sys.argv[1:]
+          since = os.stat(started).st_mtime
+          bundles = []
+          for folder in glob.glob(os.path.join(derived, "Ghostty-*")):
+              # Xcode records the project each DerivedData folder belongs to.
+              try:
+                  with open(os.path.join(folder, "info.plist"), "rb") as f:
+                      owner = plistlib.load(f).get("WorkspacePath")
+              except (OSError, plistlib.InvalidFileException):
+                  owner = None
+              if owner and os.path.realpath(owner) != os.path.realpath(project):
+                  continue
+              for b in glob.glob(os.path.join(folder, "Logs", "Test", "*.xcresult")):
+                  if os.path.getmtime(b) >= since:
+                      bundles.append(b)
+          if not bundles:
+              print("::error::No .xcresult bundle from this run: the Swift tests did not run")
+              sys.exit(1)
+          bundles.sort(key=os.path.getmtime)
+          print("\n".join(bundles))
+          out = subprocess.run(
+              ["xcrun", "xcresulttool", "get", "test-results", "summary", "--path", bundles[-1]],
+              check=True, stdout=subprocess.PIPE, text=True).stdout
+          s = json.loads(out)
           keys = ("result", "totalTestCount", "passedTests", "failedTests", "skippedTests", "expectedFailures")
           for k in keys:
               print(f"{k}: {s.get(k)}")

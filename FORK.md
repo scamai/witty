@@ -160,7 +160,7 @@ All Witty-only files.
 | File | What and why |
 | --- | --- |
 | `.github/dependabot.yml` | Removed. In this repository Dependabot opened PRs that bump the actions in upstream's workflows. Witty takes those bumps with each upstream sync instead, so its copies of upstream's workflows differ from upstream's only by the two guards below. If a merge brings the file back or conflicts on it, keep it deleted. Dependabot's security alerts and security-update PRs do not need this file and stay on in the repository settings. |
-| `.github/workflows/witty-macos.yml` | Witty-only: Witty's CI. On GitHub-hosted `macos-26` runners with Xcode 26.6 and the Zig that `build.zig.zon` names, it builds a Debug `Witty.app` for the runner's architecture, checks its bundle ID and that the updater is off, runs `zig build test` (the Zig unit tests, then the Swift tests) and reads the Swift test counts from the result bundle, and runs the four release-script tests. It runs for pull requests, and for pushes to `main` or a `ci/` branch, that change a file it lists, and uses no secrets: the app is signed ad hoc. Witty is public, so GitHub-hosted runners cost nothing here. |
+| `.github/workflows/witty-macos.yml` | Witty-only: Witty's CI. On Scam.ai's own Mac, a self-hosted runner in the organization's `macserver-public` runner group (labels `self-hosted`, `macOS`, `macserver-public`), with its Xcode 26 and the Zig that `build.zig.zon` names, it builds a Debug `Witty.app` for the Mac's architecture, checks its bundle ID and that the updater is off, runs `zig build test` (the Zig unit tests, then the Swift tests) and reads the Swift test counts from the result bundle that run wrote, and runs the four release-script tests. It runs for pushes to `main` that change a file it lists, and when started by hand from `main`; never for a pull request, and never on a GitHub-hosted Mac (the organization's rule since 2026-11-21). The runner group accepts only this file as it is on `refs/heads/main`, so a run from a pull request or another branch could never start, and a fork's pull request must not reach a self-hosted runner. It uses no secrets: the app is signed ad hoc. To try a change to it, merge it to `main` or start it by hand there (`gh workflow run witty-macos.yml -R scamai/witty --ref main`). |
 | `.github/workflows/test.yml`, `.github/workflows/release-tag.yml` | One `if:` each, marked `Witty:`, so that the `required` job of `test.yml` and the `setup` job of `release-tag.yml` run only in `ghostty-org/ghostty`. Every job in both files runs on Ghostty's Namespace runners (`namespace-profile-ghostty-*`), which this repository does not have, so a job that starts here waits for a runner until GitHub cancels it after 24 hours. Upstream already guards the other jobs of `test.yml`, directly or through `needs:` on a guarded job, but `required` escaped through `if: always()`: in the `Test` run of 2026-06-19 (`27838703787`) every other job was skipped and it alone was cancelled after 24 hours. `release-tag.yml` had no guard, so pushing one of upstream's `vX.Y.Z` tags here would have queued its `setup` job, which the other five need, for a runner that never comes. On a merge that changes these workflows, keep both guards and look for a new job that escapes them: one with no `needs:` and no guard, or one whose `if:` uses `always()`. |
 
 ### Fixes not upstream
@@ -261,7 +261,8 @@ upstream commits that touched each one in the 12 months to 2026-10-24:
   for those; `release-tip.yml` starts after a `Test` run on `main`, and then
   its `setup` job, which every other job needs, runs only in `ghostty-org`;
   `release-tip.yml` started by hand and `publish-tag.yml`, which is manual,
-  would still wait for runners here.
+  would still wait for runners here. All three are also disabled in this
+  repository's Actions settings since 2026-11-21 (below).
 - **Upstream's community workflows** (`vouch-*.yml`, `milestone.yml`). The
   files stay as upstream has them, but the workflows are disabled in this
   repository's Actions settings (2026-10-18): they run on Ghostty's own runners
@@ -270,4 +271,16 @@ upstream commits that touched each one in the 12 months to 2026-10-24:
   2026-06-19, when each of its runs here waited 24 hours for a runner and was
   cancelled. With its `Witty:` guard none of its jobs starts here, so enabling
   it would only add a skipped run to every push; `witty-macos.yml` is Witty's
-  CI instead. Re-enable one with `gh workflow enable <file> -R scamai/witty`.
+  CI instead. On 2026-11-21 the rest of upstream's workflows were disabled the
+  same way, files unchanged, because none of them can do anything here:
+  `nix.yml` (every push and pull request; its jobs run on Namespace runners
+  and only in `ghostty-org`, so each run was skipped), `release-tag.yml`,
+  `release-tip.yml` and `publish-tag.yml` (above), `snap.yml` and
+  `flatpak.yml` (started by `test.yml` or by hand; Namespace runners),
+  `update-colorschemes.yml` (weekly; runs only in `ghostty-org`, so each run
+  was skipped) and `clean-artifacts.yml` (daily; deletes workflow artifacts
+  older than a week, which only upstream's `test.yml`, `release-tag.yml` and
+  `release-tip.yml` upload; `witty-macos.yml` uploads none, and the repository
+  held no artifacts on 2026-11-21). Only
+  `witty-macos.yml` and GitHub's Dependabot updates run in this repository.
+  Re-enable one with `gh workflow enable <file> -R scamai/witty`.

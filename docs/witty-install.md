@@ -219,11 +219,12 @@ and its process (vouching, Discussions) does not apply here. Before changing a
 file that upstream also changes, read the [merge rules](../FORK.md#merge-rules)
 in FORK.md.
 
-Upstream's `test.yml` workflow is disabled in this repository (its jobs only
-run in `ghostty-org`). Witty's own workflow,
+Upstream's workflows, `test.yml` among them, are disabled in this repository
+(their jobs only run in `ghostty-org`). Witty's own workflow,
 [`witty-macos.yml`](../.github/workflows/witty-macos.yml), builds the app and
-runs the tests on a GitHub-hosted Mac for each pull request that changes the
-code. Running the tests locally first is still faster.
+runs the tests on Witty's own Mac after each change to the code reaches
+`main`. Pull requests get no CI run, so run the tests locally before you open
+one.
 
 ---
 
